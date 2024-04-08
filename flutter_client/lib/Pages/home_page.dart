@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_client/Data/AppData.dart';
-import 'package:flutter_client/Pages/settings_page.dart';
 import 'package:flutter_client/main.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,20 +16,11 @@ class _HomePageState extends State<HomePage> {
   Widget _status = Text('?');
   bool _loading = true;
 
-  void _start() {
-    print('start');
-    _submit('start');
-  }
+  void _start() => _submit('start');
 
-  void _suspend() {
-    print('suspend');
-    _submit('suspend');
-  }
+  void _suspend() => _submit('suspend');
 
-  void _stop() {
-    print('stop');
-    _submit('stop');
-  }
+  void _stop() => _submit('stop');
 
   void _getStatus() {
     setState(() {
@@ -50,10 +40,7 @@ class _HomePageState extends State<HomePage> {
       http.get(Uri.parse(backendUrl + 'status/')).then((res) {
         if (res.statusCode == 200)
           setState(() {
-            var jsonDecode2 = jsonDecode(res.body);
-            print(res.body);
-            print(jsonDecode2);
-            _status = res.body != '' ? jsonDecode2['status'] : Text('?');
+            _status = res.body != '' ? Text(jsonDecode(res.body)['status']) : Text('?');
           });
         else {
           _status = FloatingActionButton(
@@ -104,19 +91,14 @@ class _HomePageState extends State<HomePage> {
     if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
 
     if (res.statusCode == 200) {
-      setState(() {
-        _status = Text(action);
-      });
+      _getStatus();
       App.showSnackBar(
         'Successful',
         'Close',
         () {},
       );
     } else {
-      _status = FloatingActionButton(
-        onPressed: _getStatus,
-        child: Icon(Icons.refresh),
-      );
+      _getStatus();
       App.showSnackBar(
         responseObject?['message'] ?? 'Error',
         'Close',
