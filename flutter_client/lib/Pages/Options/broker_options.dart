@@ -1,0 +1,251 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_client/Data/AppData.dart';
+import 'package:flutter_client/Pages/settings_page.dart';
+import 'package:flutter_client/main.dart';
+import 'package:http/http.dart' as http;
+
+class BrokerOptions extends StatefulWidget {
+  const BrokerOptions({super.key});
+
+  @override
+  State<BrokerOptions> createState() => _BrokerOptionsState();
+}
+
+class _BrokerOptionsState extends State<BrokerOptions> {
+  var _timeFrameDefualt = TextEditingValue();
+  String? _timeFrame = null;
+
+  var _symbol = TextEditingController();
+  var _brokerCommission = TextEditingController();
+  var _baseUrl = TextEditingController();
+  var _apiKey = TextEditingController();
+  var _apiSecret = TextEditingController();
+
+  void setFields(Map<String, dynamic>? options) {
+    setState(() {
+      if (options == null) return;
+
+      String tf = '';
+      AppStaticData.TimeFrames.forEach((key, value) {
+        print({key, value, options['timeFrame']});
+        if (options['timeFrame'] != null && value == options['timeFrame']) tf = key;
+      });
+      _timeFrame = tf;
+      _timeFrameDefualt = TextEditingValue(text: tf);
+
+      _symbol.text = options['symbol'] ?? '';
+      _brokerCommission.text = options['brokerCommission']?.toString() ?? '';
+      _baseUrl.text = options['baseUrl'] ?? '';
+      _apiKey.text = options['apiKey'] ?? '';
+      _apiSecret.text = options['apiSecret'] ?? '';
+    });
+
+    return null;
+  }
+
+  bool _isSubmitting = false;
+
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SettingsPage.getOptions().then((options) {
+        if (options == null) {
+          return;
+        }
+
+        AppStaticData.getSharedPreferences().then((value) {
+          setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
+        });
+      });
+    });
+    // SettingsPage.getOptions().then((options) {
+    //   if (options == null) {
+    //     super.initState();
+    //     return;
+    //   }
+
+    //   AppStaticData.getSharedPreferences().then((value) {
+    //     setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
+    //   }).then((v) => super.initState());
+    // });
+  }
+
+  void _submit() async {
+    if (_timeFrame == null || _symbol.text == '' || _brokerCommission.text == '' || _baseUrl.text == '' || _apiKey.text == '' || _apiSecret.text == '') {
+      App.showSnackBar(
+        'Input fields are not completed',
+        'Close',
+        () {},
+      );
+      return;
+    }
+
+    if (_isSubmitting) return;
+
+    String? backendUrl = await AppDataRepository.GetBackendUrl();
+    if (backendUrl == null) {
+      App.showSnackBar(
+        'No URL provided',
+        'Close',
+        () {},
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "Symbol": _symbol.text, "BrokerCommission": double.parse(_brokerCommission.text), "BaseUrl": _baseUrl.text, "ApiKey": _apiKey.text, "ApiSecret": _apiSecret.text};
+
+    http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+
+    Map<String, dynamic> responseObject = jsonDecode(res.body) as Map<String, dynamic>;
+
+    setState(() {
+      if (res.statusCode == 200) {
+        setFields(responseObject);
+        App.showSnackBar(
+          'Successfull',
+          'Close',
+          () {},
+        );
+      } else
+        App.showSnackBar(
+          responseObject['Message'] == null ? 'Error' : responseObject['Message'],
+          'Close',
+          () {},
+        );
+      _isSubmitting = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var space = SizedBox(
+      width: 10,
+      height: 35,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ListView(
+        children: [
+          TextField(
+            controller: _symbol,
+            enabled: !_isSubmitting,
+            decoration: InputDecoration(
+              labelText: "Symbol",
+              hintText: "BTC-USDT",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+              ),
+            ),
+          ),
+          space,
+          TextField(
+            controller: _brokerCommission,
+            keyboardType: TextInputType.number,
+            enabled: !_isSubmitting,
+            decoration: InputDecoration(
+              labelText: "Commission",
+              hintText: "0.001",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+              ),
+            ),
+          ),
+          space,
+          TextField(
+            controller: _baseUrl,
+            enabled: !_isSubmitting,
+            keyboardType: TextInputType.url,
+            decoration: InputDecoration(
+              labelText: "Base Url",
+              hintText: "open-api-vst.bingx.com",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+              ),
+            ),
+          ),
+          space,
+          TextField(
+            controller: _apiKey,
+            enabled: !_isSubmitting,
+            keyboardType: TextInputType.url,
+            decoration: InputDecoration(
+              labelText: "API Key",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+              ),
+            ),
+          ),
+          space,
+          TextField(
+            controller: _apiSecret,
+            enabled: !_isSubmitting,
+            decoration: InputDecoration(
+              labelText: "API Secret",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+              ),
+            ),
+          ),
+          space,
+          Autocomplete<String>(
+            initialValue: _timeFrameDefualt,
+            optionsBuilder: (TextEditingValue textEditingValue) => AppStaticData.TimeFrames.keys.where((timeFrame) => timeFrame.toLowerCase().contains(textEditingValue.text.toLowerCase())),
+            onSelected: (String selection) => _timeFrame = selection,
+            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextField(
+              controller: textEditingController,
+              focusNode: focusNode,
+              onEditingComplete: onFieldSubmitted,
+              enabled: !_isSubmitting,
+              decoration: InputDecoration(
+                labelText: "Time Frame",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 70,
+            width: 10,
+          ),
+          ElevatedButton(
+              onPressed: _submit,
+              child: _isSubmitting
+                  ? SizedBox(
+                      height: 25,
+                      width: 25,
+                      child: CircularProgressIndicator(),
+                    )
+                  : Text('Update')),
+        ],
+      ),
+    );
+  }
+}
