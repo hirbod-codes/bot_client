@@ -15,8 +15,8 @@ class BrokerOptions extends StatefulWidget {
 }
 
 class _BrokerOptionsState extends State<BrokerOptions> {
-  var _timeFrameDefualt = TextEditingValue();
-  String? _timeFrame = null;
+  String _timeFrame = '';
+  var _timeFrameDefault = TextEditingValue(text: '');
 
   var _symbol = TextEditingController();
   var _brokerCommission = TextEditingController();
@@ -25,16 +25,16 @@ class _BrokerOptionsState extends State<BrokerOptions> {
   var _apiSecret = TextEditingController();
 
   void setFields(Map<String, dynamic>? options) {
-    setState(() {
-      if (options == null) return;
+    if (options == null) return;
 
-      String tf = '';
-      AppStaticData.TimeFrames.forEach((key, value) {
-        print({key, value, options['timeFrame']});
-        if (options['timeFrame'] != null && value == options['timeFrame']) tf = key;
-      });
+    String tf = '';
+    AppStaticData.TimeFrames.forEach((key, value) {
+      if (options['timeFrame'] != null && value == (options['timeFrame'] as int)) tf = key;
+    });
+
+    setState(() {
       _timeFrame = tf;
-      _timeFrameDefualt = TextEditingValue(text: tf);
+      _timeFrameDefault = TextEditingValue(text: tf);
 
       _symbol.text = options['symbol'] ?? '';
       _brokerCommission.text = options['brokerCommission']?.toString() ?? '';
@@ -42,40 +42,24 @@ class _BrokerOptionsState extends State<BrokerOptions> {
       _apiKey.text = options['apiKey'] ?? '';
       _apiSecret.text = options['apiSecret'] ?? '';
     });
-
-    return null;
   }
 
   bool _isSubmitting = false;
 
   void initState() {
-    super.initState();
+    SettingsPage.getOptions().then((options) {
+      if (options == null) return;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      SettingsPage.getOptions().then((options) {
-        if (options == null) {
-          return;
-        }
-
-        AppStaticData.getSharedPreferences().then((value) {
-          setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
-        });
+      AppStaticData.getSharedPreferences().then((value) {
+        setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
+      }).whenComplete(() {
+        super.initState();
       });
     });
-    // SettingsPage.getOptions().then((options) {
-    //   if (options == null) {
-    //     super.initState();
-    //     return;
-    //   }
-
-    //   AppStaticData.getSharedPreferences().then((value) {
-    //     setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
-    //   }).then((v) => super.initState());
-    // });
   }
 
   void _submit() async {
-    if (_timeFrame == null || _symbol.text == '' || _brokerCommission.text == '' || _baseUrl.text == '' || _apiKey.text == '' || _apiSecret.text == '') {
+    if (_timeFrame == '' || _symbol.text == '' || _brokerCommission.text == '' || _baseUrl.text == '' || _apiKey.text == '' || _apiSecret.text == '') {
       App.showSnackBar(
         'Input fields are not completed',
         'Close',
@@ -110,7 +94,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
       if (res.statusCode == 200) {
         setFields(responseObject);
         App.showSnackBar(
-          'Successfull',
+          'Successful',
           'Close',
           () {},
         );
@@ -212,7 +196,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
           ),
           space,
           Autocomplete<String>(
-            initialValue: _timeFrameDefualt,
+            initialValue: _timeFrameDefault,
             optionsBuilder: (TextEditingValue textEditingValue) => AppStaticData.TimeFrames.keys.where((timeFrame) => timeFrame.toLowerCase().contains(textEditingValue.text.toLowerCase())),
             onSelected: (String selection) => _timeFrame = selection,
             fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextField(
