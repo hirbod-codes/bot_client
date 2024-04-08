@@ -21,7 +21,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
     if (options == null) return;
 
     setState(() {
-      _provider.text = options['provider'] ?? '';
+      _provider.text = options['providerName'] ?? '';
     });
   }
 
