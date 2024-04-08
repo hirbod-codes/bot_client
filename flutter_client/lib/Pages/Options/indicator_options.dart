@@ -33,8 +33,11 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
     setState(() {
       _superTrendCandlePart = cp;
       _superTrendCandlePartDefault = TextEditingValue(text: cp);
-      _atrPeriod.text = options['atr']['period'] ?? '';
-      _atrPeriod.text = options['atrMultiplier'] ?? '';
+
+      _atrPeriod.text = options['atr']['period']?.toString() ?? '';
+      _atrMultiplier.text = options['atrMultiplier']?.toString() ?? '';
+      _superTrendPeriod.text = options['superTrendOptions']['period']?.toString() ?? '';
+      _superTrendMultiplier.text = options['superTrendOptions']['multiplier']?.toString() ?? '';
     });
   }
 
@@ -120,6 +123,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
           Center(
             child: Text('ATR'),
           ),
+          Divider(),
           TextField(
             controller: _atrPeriod,
             keyboardType: TextInputType.number,
@@ -134,6 +138,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
               ),
             ),
           ),
+          space,
           TextField(
             controller: _atrMultiplier,
             keyboardType: TextInputType.number,
@@ -148,10 +153,12 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
               ),
             ),
           ),
-          Divider(),
+          space,
+          space,
           Center(
             child: Text('Super Trend'),
           ),
+          Divider(),
           TextField(
             controller: _superTrendPeriod,
             keyboardType: TextInputType.number,
