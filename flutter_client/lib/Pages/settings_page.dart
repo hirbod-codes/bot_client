@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_client/Data/AppData.dart';
+import 'package:flutter_client/Pages/Options/bot_options.dart';
 import 'package:flutter_client/Pages/Options/broker_options.dart';
+import 'package:flutter_client/Pages/Options/indicator_options.dart';
+import 'package:flutter_client/Pages/Options/risk_management_options.dart';
+import 'package:flutter_client/Pages/Options/runner_options.dart';
 import 'package:flutter_client/Pages/Options/security_options.dart';
+import 'package:flutter_client/Pages/Options/strategy_options.dart';
 import 'package:http/http.dart' as http;
 
 class SettingsPage extends StatefulWidget {
@@ -141,41 +146,41 @@ class _SettingsPageState extends State<SettingsPage> {
       case 1:
         setState(() {
           _title = 'Bot Options';
-          _content = BrokerOptions();
+          _content = BotOptions();
           _index = index;
         });
         break;
       case 2:
         setState(() {
           _title = 'Strategy Options';
-          _content = BrokerOptions();
+          _content = StrategyOptions();
           _index = index;
         });
         break;
       case 3:
         setState(() {
           _title = 'Indicator Options';
-          _content = BrokerOptions();
+          _content = IndicatorOptions();
           _index = index;
         });
         break;
       case 4:
         setState(() {
           _title = 'Risk Management Options';
-          _content = BrokerOptions();
+          _content = RiskManagementOptions();
           _index = index;
         });
         break;
       case 5:
         setState(() {
           _title = 'Runner Options';
-          _content = BrokerOptions();
+          _content = RunnerOptions();
           _index = index;
         });
         break;
       case 6:
         setState(() {
-          _title = 'Security';
+          _title = 'Security Options';
           _content = SecurityOptions();
           _index = index;
         });
