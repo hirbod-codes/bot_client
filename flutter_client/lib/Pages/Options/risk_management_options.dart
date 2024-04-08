@@ -27,13 +27,13 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
     if (options == null) return;
 
     setState(() {
-      _margin.text = options['_margin']?.toString() ?? '';
-      _leverage.text = options['_leverage']?.toString() ?? '';
-      _sLPercentages.text = options['_sLPercentages']?.toString() ?? '';
-      _riskRewardRatio.text = options['_riskRewardRatio']?.toString() ?? '';
-      _brokerCommission.text = options['_brokerCommission']?.toString() ?? '';
-      _brokerMaximumLeverage.text = options['_brokerMaximumLeverage']?.toString() ?? '';
-      _commissionPercentage.text = options['_commissionPercentage']?.toString() ?? '';
+      _margin.text = options['margin']?.toString() ?? '';
+      _leverage.text = options['leverage']?.toString() ?? '';
+      _sLPercentages.text = options['slPercentages']?.toString() ?? '';
+      _riskRewardRatio.text = options['riskRewardRatio']?.toString() ?? '';
+      _brokerCommission.text = options['brokerCommission']?.toString() ?? '';
+      _brokerMaximumLeverage.text = options['brokerMaximumLeverage']?.toString() ?? '';
+      _commissionPercentage.text = options['commissionPercentage']?.toString() ?? '';
     });
   }
 
