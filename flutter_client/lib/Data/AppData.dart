@@ -8,7 +8,7 @@ class AppDataKeys {
 }
 
 class AppDataRepository {
-  static Future<String?> GetBackendUrl() async{
+  static Future<String?> GetBackendUrl() async {
     String? domain = (await AppStaticData.getSharedPreferences()).getString(AppDataKeys.BackendDomain);
     int? port = (await AppStaticData.getSharedPreferences()).getInt(AppDataKeys.BackendPort);
     String? authKey = (await AppStaticData.getSharedPreferences()).getString(AppDataKeys.BackendAuthKey);
@@ -41,4 +41,6 @@ class AppStaticData {
     "1W": 7 * 24 * 60 * 60,
     "1M": 30 * 24 * 60 * 60,
   };
+
+  static Map<String, int> CandleParts = {"Open": 0, "High": 1, "Low": 2, "Close": 3, "Volume": 4, "HL2": 5, "HLC3": 6, "OC2": 7, "OHL3": 8, "OHLC4": 9, "HLCC4": 10};
 }
