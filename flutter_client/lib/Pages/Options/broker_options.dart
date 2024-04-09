@@ -59,53 +59,49 @@ class _BrokerOptionsState extends State<BrokerOptions> {
   }
 
   void _submit() async {
-    if (_timeFrame == '' || _symbol.text == '' || _brokerCommission.text == '' || _baseUrl.text == '' || _apiKey.text == '' || _apiSecret.text == '') {
-      App.showSnackBar(
-        'Input fields are not completed',
-        'Close',
-        () {},
-      );
-      return;
-    }
+    String snackBarMessage = 'Error';
 
-    if (_isSubmitting) return;
+    try {
+      if (_timeFrame == '' || _symbol.text == '' || _brokerCommission.text == '' || _baseUrl.text == '' || _apiKey.text == '' || _apiSecret.text == '') {
+        snackBarMessage = 'Input fields are not completed';
+        return;
+      }
 
-    String? backendUrl = await AppDataRepository.GetBackendUrl();
-    if (backendUrl == null) {
-      App.showSnackBar(
-        'No URL provided',
-        'Close',
-        () {},
-      );
-      return;
-    }
+      if (_isSubmitting) return;
 
-    setState(() {
-      _isSubmitting = true;
-    });
+      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      if (backendUrl == null) {
+        snackBarMessage = 'No URL provided';
+        return;
+      }
 
-    var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "Symbol": _symbol.text, "BrokerCommission": double.parse(_brokerCommission.text), "BaseUrl": _baseUrl.text, "ApiKey": _apiKey.text, "ApiSecret": _apiSecret.text};
+      setState(() {
+        _isSubmitting = true;
+      });
 
-    http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+      var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "Symbol": _symbol.text, "BrokerCommission": double.parse(_brokerCommission.text), "BaseUrl": _baseUrl.text, "ApiKey": _apiKey.text, "ApiSecret": _apiSecret.text};
 
-    Map<String, dynamic> responseObject = jsonDecode(res.body) as Map<String, dynamic>;
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
-    setState(() {
+      Map<String, dynamic>? responseObject = null;
+      if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
+
       if (res.statusCode == 200) {
-        setFields(responseObject);
-        App.showSnackBar(
-          'Successful',
-          'Close',
-          () {},
-        );
+        snackBarMessage = 'Successful';
+        if (res.body != '') setFields(responseObject);
       } else
+        snackBarMessage = responseObject?['Message'] ?? 'Error';
+    } finally {
+      setState(() {
         App.showSnackBar(
-          responseObject['Message'] == null ? 'Error' : responseObject['Message'],
+          snackBarMessage,
           'Close',
           () {},
         );
-      _isSubmitting = false;
-    });
+
+        _isSubmitting = false;
+      });
+    }
   }
 
   @override
