@@ -38,6 +38,11 @@ jobs:
           name: android-build
           path: build/app/outputs/bundle/release/app-release.aab
 
+      - uses: actions/upload-artifact@master
+        with:
+          name: android-build
+          path: ./flutter_bundle/build/app/outputs/bundle/release/app-release.aab
+
       - uses: actions/download-artifact@master
         with:
           path: ./artifacts
