@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-android:
-    name: Build android
+    name: Build-android
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -42,7 +42,7 @@ jobs:
           name: android-build
           path: build/app/outputs/bundle/release/
   build-ios:
-    name: Build ios
+    name: Build-ios
     runs-on: macos-latest
     defaults:
       run:
@@ -64,12 +64,17 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    needs: 
+      - "Build-ios" 
+      - "Build-android"
     steps:
       - uses: actions/download-artifact@v3
         with:
           path: artifacts
 
-      - run: ls -a artifacts
+      - run: ls -a .
+      - run: ls -a $GITHUB_WORKSPACE/artifacts
+      - run: ls -a $GITHUB_WORKSPACE/
       - run: ls -a artifacts/android-build
       - run: ls -a artifacts/ios-build
 
