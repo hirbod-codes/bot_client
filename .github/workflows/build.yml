@@ -1,11 +1,14 @@
 name: Build mobile apps
 on:
+  workflow_dispatch:
   push:
     tags:
       - "*"
-    branches: ["main"]
+    branches:
+      - main
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   build-android:
