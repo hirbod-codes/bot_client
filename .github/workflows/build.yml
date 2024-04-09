@@ -30,7 +30,7 @@ jobs:
       - run: flutter build apk
       - run: flutter build appbundle
 
-      - run: cp ./build /build
+      - run: cp -r ./build /build
       - run: ls -a /build
 
       - uses: actions/upload-artifact@master
