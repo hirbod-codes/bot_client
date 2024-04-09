@@ -36,52 +36,38 @@ jobs:
         with:
           name: android-build
           path: build/app/outputs/bundle/release/
-
-      - uses: actions/download-artifact@v3
+  build-ios:
+    name: Build ios
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./flutter_client
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
         with:
-          path: artifacts
-          merge-multiple: true
+          channel: "stable"
+          architecture: x64
+      - run: flutter pub get
+      # - run: flutter gen-l10n
+      - run: flutter build ios --release --no-codesign
 
-      - run: ls -a ./
-      - run: ls -a $GITHUB_WORKSPACE/
-      - run: ls -a $GITHUB_WORKSPACE/artifacts
-  # build-ios:
-  #   name: Build ios
-  #   runs-on: macos-latest
-  #   defaults:
-  #     run:
-  #       working-directory: ./flutter_client
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: subosito/flutter-action@v2
-  #       with:
-  #         channel: "stable"
-  #         architecture: x64
-  #     - run: flutter pub get
-  #     # - run: flutter gen-l10n
-  #     - run: flutter build ios --release --no-codesign
-
-  #     - run: ls -a ./
-  #     - run: ls -a /Users/runner/work/bot_client/bot_client/flutter_client/build/
-  #     - run: ls -a /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/
-  #     - run: ls -a /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/iphoneos/
-
-  #     - uses: actions/upload-artifact@master
-  #       with:
-  #         name: ios-build
-  #         path: /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/iphoneos/Runner.app
+      - uses: actions/upload-artifact@3
+        with:
+          name: ios-build
+          path: /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/iphoneos/Runner.app
   release:
     name: create release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@master
+      - uses: actions/download-artifact@3
         with:
-          path: ./artifacts
+          path: artifacts
           merge-multiple: true
       - uses: ncipollo/release-action@v1
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         with:
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: ./artifacts
+          artifacts: artifacts
           body: "new release"
