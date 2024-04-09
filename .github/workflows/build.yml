@@ -23,19 +23,30 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.16.9"
-      - name: Install dependencies
-        run: flutter pub get
-      # - name: Generate l10n
-      #   run: flutter gen-l10n
-      - name: Build apk
-        run: flutter build apk
-      - name: Build appbundle
-        run: flutter build appbundle
+
+      - run: flutter pub get
+      # - run: flutter gen-l10n
+      - run: flutter build apk
+      - run: flutter build appbundle
+
+      - run: ls -a ./
+      - run: ls -a ./build/
+      - run: ls -a ./build/app/
+      - run: ls -a ./build/app/outputs/
+      - run: ls -a ./build/app/outputs/bundle/
+      - run: ls -a ./build/app/outputs/bundle/
 
       - uses: actions/upload-artifact@master
         with:
           name: android-build
-          path: build/app/outputs/bundle/release/app-release.aab
+          path: build/app/outputs/
+
+      - uses: actions/download-artifact@master
+        with:
+          path: ./artifacts
+          merge-multiple: true
+
+      - run: ls -a ./artifacts
   build-ios:
     name: Build ios
     runs-on: macos-latest
@@ -48,12 +59,13 @@ jobs:
         with:
           channel: "stable"
           architecture: x64
-      - name: Install dependencies
-        run: flutter pub get
-      # - name: Generate l10n
-      #   run: flutter gen-l10n
-      - name: Build ios
-        run: flutter build ios --release --no-codesign
+      - run: flutter pub get
+      # - run: flutter gen-l10n
+      - run: flutter build ios --release --no-codesign
+
+      - run: ls -a /Users/runner/work/bot_client/bot_client/flutter_client/build/
+      - run: ls -a /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/
+      - run: ls -a /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/iphoneos/
 
       - uses: actions/upload-artifact@master
         with:
