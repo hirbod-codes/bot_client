@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_client/Pages/home_page.dart';
 import 'package:flutter_client/Pages/settings_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
+class App extends StatefulWidget {
+  const App({super.key});
+
+  static void showSnackBar(String content, String label, void Function() onPressed) => rootScaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text(content),
+          action: SnackBarAction(
+            label: label,
+            onPressed: onPressed,
+          ),
+        ),
+      );
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
       title: 'Bot',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -23,61 +42,6 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/settings': (context) => SettingsPage(),
       },
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-//   Widget _page = Center(child: Text('Home'));
-  Widget _page = SettingsPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text("Bot"),
-      ),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            DrawerHeader(
-              child: Icon(
-                Icons.android,
-                size: 48,
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/home');
-                // setState(() => _page = Center(child: Text('Home')));
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/settings');
-                // setState(() => _page = SettingsPage());
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Center(
-        child: Text('Home'),
-      ),
     );
   }
 }
