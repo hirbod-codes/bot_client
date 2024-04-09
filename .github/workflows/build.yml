@@ -52,7 +52,7 @@ jobs:
       # - run: flutter gen-l10n
       - run: flutter build ios --release --no-codesign
 
-      - uses: actions/upload-artifact@3
+      - uses: actions/upload-artifact@v3
         with:
           name: ios-build
           path: /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/iphoneos/Runner.app
@@ -60,7 +60,7 @@ jobs:
     name: create release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@3
+      - uses: actions/download-artifact@v3
         with:
           path: artifacts
           merge-multiple: true
