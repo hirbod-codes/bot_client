@@ -30,18 +30,16 @@ jobs:
       - run: flutter build apk
       - run: flutter build appbundle
 
-      - run: cp -r ./build $GITHUB_WORKSPACE/build
+      - run: cp -r ./build ../build
 
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v3
         with:
           name: android-build
           path: build/app/outputs/bundle/release/
 
-      - run: mkdir $GITHUB_WORKSPACE/artifacts
-
-      - uses: actions/download-artifact@master
+      - uses: actions/download-artifact@v3
         with:
-          path: $GITHUB_WORKSPACE/artifacts
+          path: artifacts
           merge-multiple: true
 
       - run: ls -a ./
