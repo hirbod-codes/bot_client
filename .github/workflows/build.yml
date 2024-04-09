@@ -24,20 +24,11 @@ jobs:
       - run: flutter pub get
         working-directory: ./flutter_client
       # - run: flutter gen-l10n
-        # working-directory: ./flutter_client
+      # working-directory: ./flutter_client
       - run: flutter build apk
         working-directory: ./flutter_client
       - run: flutter build appbundle
         working-directory: ./flutter_client
-
-      - run: pwd
-      - run: pwd
-      - run: ls -a $GITHUB_WORKSPACE
-      - run: ls -a ./
-      - run: ls -a ./flutter_client/build/app/outputs/bundle/
-      - run: ls -a ./flutter_client/build/app/outputs/bundle/release/app-release.aab
-      - run: ls -a ./build/app/outputs/bundle/
-      - run: ls -a ./build/app/outputs/bundle/release/app-release.aab
 
       - uses: actions/upload-artifact@master
         with:
@@ -47,7 +38,12 @@ jobs:
       - uses: actions/upload-artifact@master
         with:
           name: android-build
-          path: ./flutter_bundle/build/app/outputs/bundle/release/
+          path: flutter_bundle/build/app/outputs/bundle/release/
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: android-build
+          path: $GITHUB_WORKSPACE/flutter_bundle/build/app/outputs/bundle/release/
 
       - uses: actions/download-artifact@master
         with:
