@@ -78,11 +78,11 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
 
       var data = {
         "Atr": {"Period": int.parse(_atrPeriod.text), "Source": "close"},
-        "AtrMultiplier": int.parse(_atrMultiplier.text),
-        "SuperTrend": {"Period": int.parse(_superTrendPeriod.text), "Multiplier": int.parse(_superTrendMultiplier.text), "CandlePart": AppStaticData.CandleParts[_superTrendCandlePart], "ChangeATRCalculationMethod": true}
+        "AtrMultiplier": double.parse(_atrMultiplier.text),
+        "SuperTrendOptions": {"Period": int.parse(_superTrendPeriod.text), "Multiplier": double.parse(_superTrendMultiplier.text), "CandlePart": AppStaticData.CandleParts[_superTrendCandlePart], "ChangeATRCalculationMethod": true}
       };
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'indicator-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;

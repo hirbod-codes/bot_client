@@ -71,7 +71,7 @@ class _RunnerOptionsState extends State<RunnerOptions> {
 
       var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "HistoricalCandlesCount": int.parse(_historicalCandlesCount.text)};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'runner-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;

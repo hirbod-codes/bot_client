@@ -15,13 +15,13 @@ class StrategyOptions extends StatefulWidget {
 }
 
 class _StrategyOptionsState extends State<StrategyOptions> {
-  var _provider = TextEditingController();
+  var _providerName = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
 
     setState(() {
-      _provider.text = options['providerName'] ?? '';
+      _providerName.text = options['providerName'] ?? '';
     });
   }
 
@@ -43,7 +43,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
     String snackBarMessage = 'Error';
 
     try {
-      if (_provider.text == '') {
+      if (_providerName.text == '') {
         snackBarMessage = 'Input fields are not completed';
         return;
       }
@@ -60,9 +60,9 @@ class _StrategyOptionsState extends State<StrategyOptions> {
         _isSubmitting = true;
       });
 
-      var data = {"Provider": int.parse(_provider.text)};
+      var data = {"ProviderName": _providerName.text};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'strategy-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -97,7 +97,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
       child: ListView(
         children: [
           TextField(
-            controller: _provider,
+            controller: _providerName,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
             decoration: InputDecoration(
