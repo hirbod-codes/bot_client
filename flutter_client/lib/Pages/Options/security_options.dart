@@ -28,58 +28,28 @@ class SecurityOptionsState extends State<SecurityOptions> {
   }
 
   Future<void> _submit() async {
-    bool? BackendDomainResult = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.BackendDomain, _domain.text);
-    bool? BackendPortResult = await (await AppStaticData.getSharedPreferences()).setInt(AppDataKeys.BackendPort, int.parse(_port.text));
-    bool? BackendAuthKeyResult = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.BackendAuthKey, _apiKey.text);
+    String snackBarMessage = 'Error';
 
-    setState(() {
-      if (BackendDomainResult != true || BackendPortResult != true || BackendAuthKeyResult != true) {
-        App.showSnackBar(
-          'Error',
-          'Close',
-          () {},
-        );
-        return;
-      }
+    try {
+      bool? BackendDomainResult = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.BackendDomain, _domain.text);
+      bool? BackendPortResult = await (await AppStaticData.getSharedPreferences()).setInt(AppDataKeys.BackendPort, int.parse(_port.text));
+      bool? BackendAuthKeyResult = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.BackendAuthKey, _apiKey.text);
 
-      SettingsPage.getOptions().then((options) async {
-        if (options == null) {
-          App.showSnackBar(
-            'Error',
-            'Close',
-            () {},
-          );
-          return;
-        }
+      if (BackendDomainResult != true || BackendPortResult != true || BackendAuthKeyResult != true) return;
 
-        (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.Options, options).then((result) {
-          if (result)
-            App.showSnackBar(
-              'Successfull',
-              'Close',
-              () {},
-            );
-          else
-            App.showSnackBar(
-              'Successfull',
-              'Close',
-              () {},
-            );
-        }).catchError((err) {
-          App.showSnackBar(
-            'Successfull',
-            'Close',
-            () {},
-          );
-        });
-      }).catchError((err) {
-        App.showSnackBar(
-          'Successfull',
-          'Close',
-          () {},
-        );
-      });
-    });
+      String? options = await SettingsPage.getOptions();
+      if (options == null) return;
+
+      bool result = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.Options, options);
+
+      if (result == true) snackBarMessage = 'Successful';
+    } finally {
+      App.showSnackBar(
+        snackBarMessage,
+        'Close',
+        () {},
+      );
+    }
   }
 
   @override

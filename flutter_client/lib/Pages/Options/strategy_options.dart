@@ -40,53 +40,49 @@ class _StrategyOptionsState extends State<StrategyOptions> {
   bool _isSubmitting = false;
 
   void _submit() async {
-    if (_provider.text == '') {
-      App.showSnackBar(
-        'Input fields are not completed',
-        'Close',
-        () {},
-      );
-      return;
-    }
+    String snackBarMessage = 'Error';
 
-    if (_isSubmitting) return;
+    try {
+      if (_provider.text == '') {
+        snackBarMessage = 'Input fields are not completed';
+        return;
+      }
 
-    String? backendUrl = await AppDataRepository.GetBackendUrl();
-    if (backendUrl == null) {
-      App.showSnackBar(
-        'No URL provided',
-        'Close',
-        () {},
-      );
-      return;
-    }
+      if (_isSubmitting) return;
 
-    setState(() {
-      _isSubmitting = true;
-    });
+      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      if (backendUrl == null) {
+        snackBarMessage = 'No URL provided';
+        return;
+      }
 
-    var data = {"Provider": int.parse(_provider.text)};
+      setState(() {
+        _isSubmitting = true;
+      });
 
-    http.Response res = await http.patch(Uri.parse(backendUrl + 'strategy-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+      var data = {"Provider": int.parse(_provider.text)};
 
-    Map<String, dynamic> responseObject = jsonDecode(res.body) as Map<String, dynamic>;
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
-    setState(() {
+      Map<String, dynamic>? responseObject = null;
+      if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
+
       if (res.statusCode == 200) {
-        _setFields(responseObject);
-        App.showSnackBar(
-          'Successful',
-          'Close',
-          () {},
-        );
+        snackBarMessage = 'Successful';
+        if (res.body != '') _setFields(responseObject);
       } else
+        snackBarMessage = responseObject?['Message'] ?? 'Error';
+    } finally {
+      setState(() {
         App.showSnackBar(
-          responseObject['Message'] == null ? 'Error' : responseObject['Message'],
+          snackBarMessage,
           'Close',
           () {},
         );
-      _isSubmitting = false;
-    });
+
+        _isSubmitting = false;
+      });
+    }
   }
 
   @override

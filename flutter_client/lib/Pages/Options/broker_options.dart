@@ -24,7 +24,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
   var _apiKey = TextEditingController();
   var _apiSecret = TextEditingController();
 
-  void setFields(Map<String, dynamic>? options) {
+  void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
 
     String tf = '';
@@ -51,7 +51,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
       if (options == null) return;
 
       AppStaticData.getSharedPreferences().then((value) {
-        setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
+        _setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
       }).whenComplete(() {
         super.initState();
       });
@@ -88,7 +88,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
 
       if (res.statusCode == 200) {
         snackBarMessage = 'Successful';
-        if (res.body != '') setFields(responseObject);
+        if (res.body != '') _setFields(responseObject);
       } else
         snackBarMessage = responseObject?['Message'] ?? 'Error';
     } finally {
