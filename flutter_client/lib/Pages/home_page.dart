@@ -13,8 +13,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Widget _status = Text('?');
-  bool _loading = true;
+  Widget _status = Icon(Icons.question_mark);
+  bool _loading = false;
 
   void _start() => _submit('start');
 
@@ -22,43 +22,47 @@ class _HomePageState extends State<HomePage> {
 
   void _stop() => _submit('stop');
 
-  void _getStatus() {
-    setState(() {
-      _loading = true;
-    });
+  void _getStatus() async {
+    if (_loading) return;
 
-    AppDataRepository.GetBackendUrl().then((backendUrl) {
-      if (backendUrl == null) {
-        App.showSnackBar(
-          'No URL provided',
-          'Close',
-          () {},
-        );
+    bool wasSuccessful = false;
+    String snackBarMessage = '';
+    try {
+      setState(() {
+        _loading = true;
+      });
+
+      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      if (backendUrl == null) return;
+
+      var res = await http.get(Uri.parse(backendUrl + 'status/'));
+
+      if (res.statusCode == 200) {
+        wasSuccessful = true;
+        snackBarMessage = 'Successful';
+        setState(() {
+          if (res.body != '') _status = Text(jsonDecode(res.body)['status']);
+        });
         return;
       }
+      snackBarMessage = 'Error';
+    } finally {
+      setState(() {
+        _loading = false;
 
-      http.get(Uri.parse(backendUrl + 'status/')).then((res) {
-        if (res.statusCode == 200)
-          setState(() {
-            _status = res.body != '' ? Text(jsonDecode(res.body)['status']) : Text('?');
-          });
-        else {
+        if (!wasSuccessful)
           _status = FloatingActionButton(
             onPressed: _getStatus,
             child: Icon(Icons.refresh),
           );
-          App.showSnackBar(
-            jsonDecode(res.body)['message'] ?? 'Error',
-            'Close',
-            () {},
-          );
-        }
-      }).whenComplete(() {
-        setState(() {
-          _loading = false;
-        });
+
+        App.showSnackBar(
+          snackBarMessage,
+          'Close',
+          () {},
+        );
       });
-    });
+    }
   }
 
   void initState() {
@@ -71,44 +75,41 @@ class _HomePageState extends State<HomePage> {
   void _submit(String action) async {
     if (_isSubmitting) return;
 
-    String? backendUrl = await AppDataRepository.GetBackendUrl();
-    if (backendUrl == null || !['start', 'suspend', 'stop'].contains(action)) {
-      App.showSnackBar(
-        'No URL provided',
-        'Close',
-        () {},
-      );
-      return;
-    }
+    bool wasSuccessful = false;
+    String snackBarMessage = 'Error';
+    try {
+      setState(() {
+        _isSubmitting = true;
+      });
 
-    setState(() {
-      _isSubmitting = true;
-    });
+      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      if (backendUrl == null || !['start', 'suspend', 'stop'].contains(action)) {
+        snackBarMessage = 'No URL provided.';
+        return;
+      }
 
-    http.Response res = await http.post(Uri.parse(backendUrl + "${action}/"));
+      http.Response res = await http.post(Uri.parse(backendUrl + "${action}/"));
 
-    Map<String, dynamic>? responseObject = null;
-    if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
+      Map<String, dynamic>? responseObject = null;
+      if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
 
-    if (res.statusCode == 200) {
+      if (res.statusCode == 200) {
+        wasSuccessful = true;
+        snackBarMessage = 'Successful';
+      } else
+        snackBarMessage = responseObject?['message'] ?? 'Error';
+    } finally {
       _getStatus();
-      App.showSnackBar(
-        'Successful',
-        'Close',
-        () {},
-      );
-    } else {
-      _getStatus();
-      App.showSnackBar(
-        responseObject?['message'] ?? 'Error',
-        'Close',
-        () {},
-      );
+      setState(() {
+        _isSubmitting = false;
+        if (wasSuccessful)
+          App.showSnackBar(
+            snackBarMessage,
+            'Close',
+            () {},
+          );
+      });
     }
-
-    setState(() {
-      _isSubmitting = false;
-    });
   }
 
   @override
@@ -123,6 +124,13 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text("Bot"),
         elevation: 3,
+        actions: [
+          FloatingActionButton(
+              onPressed: _getStatus,
+              child: Icon(
+                Icons.refresh,
+              )),
+        ],
       ),
       drawer: Drawer(
         child: Column(
