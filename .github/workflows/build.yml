@@ -35,7 +35,7 @@ jobs:
       - uses: actions/upload-artifact@master
         with:
           name: android-build
-          path: build/app/outputs/apk/release/
+          path: build/app/outputs/bundle/release/app-release.aab
   build-ios:
     name: Build ios
     runs-on: macos-latest
@@ -58,16 +58,19 @@ jobs:
       - uses: actions/upload-artifact@master
         with:
           name: ios-build
-          path: build/ios/ipa
+          path: /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/iphoneos/Runner.app
   release:
     name: create release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@master
+        with:
+          path: ./artifacts
+          merge-multiple: true
       - uses: ncipollo/release-action@v1
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         with:
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: "ios-build,android-build"
+          artifacts: ./artifacts
           body: "new release"
