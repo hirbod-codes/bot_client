@@ -30,23 +30,28 @@ jobs:
       - run: flutter build apk
       - run: flutter build appbundle
 
-      - run: cp -r ./build /build
-      - run: ls -a /build
+      - run: cp -r ./build $GITHUB_WORKSPACE/build
+      - run: ls -a $GITHUB_WORKSPACE/build
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: android-build
+          path: $GITHUB_WORKSPACE/build/app/outputs/bundle/release/
 
       - uses: actions/upload-artifact@master
         with:
           working-directory: ./flutter_client
           name: android-build
-          path: /build/app/outputs/bundle/release/
+          path: build/app/outputs/bundle/release/
 
       - uses: actions/download-artifact@master
         with:
-          path: /artifacts
+          path: $GITHUB_WORKSPACE/artifacts
           merge-multiple: true
 
       - run: ls -a ./
-      - run: ls -a /build
-      - run: ls -a /artifacts
+      - run: ls -a $GITHUB_WORKSPACE/build
+      - run: ls -a $GITHUB_WORKSPACE/artifacts
   # build-ios:
   #   name: Build ios
   #   runs-on: macos-latest
