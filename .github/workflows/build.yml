@@ -11,6 +11,9 @@ jobs:
   build-android:
     name: Build android
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./flutter_client
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v2
@@ -24,34 +27,26 @@ jobs:
       - run: flutter pub get
         working-directory: ./flutter_client
       # - run: flutter gen-l10n
-      # working-directory: ./flutter_client
       - run: flutter build apk
-        working-directory: ./flutter_client
       - run: flutter build appbundle
-        working-directory: ./flutter_client
+
+      - run: cp ./build /build
+      - run: ls -a /build
 
       - uses: actions/upload-artifact@master
         with:
+          working-directory: ./flutter_client
           name: android-build
-          path: build/app/outputs/bundle/release/
-
-      - uses: actions/upload-artifact@master
-        with:
-          name: android-build
-          path: flutter_bundle/build/app/outputs/bundle/release/
-
-      - uses: actions/upload-artifact@master
-        with:
-          name: android-build
-          path: $GITHUB_WORKSPACE/flutter_bundle/build/app/outputs/bundle/release/
+          path: /build/app/outputs/bundle/release/
 
       - uses: actions/download-artifact@master
         with:
-          path: ./artifacts
+          path: /artifacts
           merge-multiple: true
 
       - run: ls -a ./
-      - run: ls -a ./artifacts
+      - run: ls -a /build
+      - run: ls -a /artifacts
   # build-ios:
   #   name: Build ios
   #   runs-on: macos-latest
