@@ -15,8 +15,7 @@ class BrokerOptions extends StatefulWidget {
 }
 
 class _BrokerOptionsState extends State<BrokerOptions> {
-  String _timeFrame = '';
-  var _timeFrameDefault = TextEditingValue(text: '');
+  String? _timeFrame = AppStaticData.TimeFrames.keys.first;
 
   var _symbol = TextEditingController();
   var _brokerCommission = TextEditingController();
@@ -34,7 +33,6 @@ class _BrokerOptionsState extends State<BrokerOptions> {
 
     setState(() {
       _timeFrame = tf;
-      _timeFrameDefault = TextEditingValue(text: tf);
 
       _symbol.text = options['symbol'] ?? '';
       _brokerCommission.text = options['brokerCommission']?.toString() ?? '';
@@ -47,15 +45,17 @@ class _BrokerOptionsState extends State<BrokerOptions> {
   bool _isSubmitting = false;
 
   void initState() {
-    SettingsPage.getOptions().then((options) {
-      if (options == null) return;
+    try {
+      SettingsPage.getOptions().then((options) {
+        if (options == null) return;
 
-      AppStaticData.getSharedPreferences().then((value) {
-        _setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
-      }).whenComplete(() {
-        super.initState();
+        AppStaticData.getSharedPreferences().then((value) {
+          _setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
+        });
       });
-    });
+    } finally {
+      super.initState();
+    }
   }
 
   void _submit() async {
@@ -93,11 +93,12 @@ class _BrokerOptionsState extends State<BrokerOptions> {
         snackBarMessage = responseObject?['Message'] ?? 'Error';
     } finally {
       setState(() {
-        App.showSnackBar(
-          snackBarMessage,
-          'Close',
-          () {},
-        );
+        if (snackBarMessage != '')
+          App.showSnackBar(
+            snackBarMessage,
+            'Close',
+            () {},
+          );
 
         _isSubmitting = false;
       });
@@ -191,25 +192,19 @@ class _BrokerOptionsState extends State<BrokerOptions> {
             ),
           ),
           space,
-          Autocomplete<String>(
-            initialValue: _timeFrameDefault,
-            optionsBuilder: (TextEditingValue textEditingValue) => AppStaticData.TimeFrames.keys.where((timeFrame) => timeFrame.toLowerCase().contains(textEditingValue.text.toLowerCase())),
-            onSelected: (String selection) => _timeFrame = selection,
-            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextField(
-              controller: textEditingController,
-              focusNode: focusNode,
-              onEditingComplete: onFieldSubmitted,
-              enabled: !_isSubmitting,
-              decoration: InputDecoration(
-                labelText: "Time Frame",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
-                ),
-              ),
-            ),
+          DropdownButton(
+            isExpanded: true,
+            value: _timeFrame,
+            elevation: 16,
+            items: AppStaticData.TimeFrames.map<String, DropdownMenuItem<String>>((k, v) {
+              return MapEntry(
+                  k,
+                  DropdownMenuItem<String>(
+                    value: k,
+                    child: Text(k),
+                  ));
+            }).values.toList(),
+            onChanged: (a) => setState(() => _timeFrame = a),
           ),
           SizedBox(
             height: 70,

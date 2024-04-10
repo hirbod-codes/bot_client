@@ -15,10 +15,9 @@ class BotOptions extends StatefulWidget {
 }
 
 class _BotOptionsState extends State<BotOptions> {
-  String _timeFrame = '';
-  var _timeFrameDefault = TextEditingValue(text: '');
+  String? _timeFrame = AppStaticData.TimeFrames.keys.first;
   var _provider = TextEditingController();
-  bool? _shouldSkipOnParallelPositionRequest = null;
+  bool _shouldSkipOnParallelPositionRequest = false;
   var _retryCount = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
@@ -31,7 +30,6 @@ class _BotOptionsState extends State<BotOptions> {
 
     setState(() {
       _timeFrame = tf;
-      _timeFrameDefault = TextEditingValue(text: tf);
       _provider.text = options['provider'] ?? '';
       _shouldSkipOnParallelPositionRequest = options['shouldSkipOnParallelPositionRequest'] ?? '';
       _retryCount.text = options['retryCount']?.toString() ?? '';
@@ -56,7 +54,7 @@ class _BotOptionsState extends State<BotOptions> {
     String snackBarMessage = 'Error';
 
     try {
-      if (_timeFrame == '' || _provider.text == '' || _shouldSkipOnParallelPositionRequest == null || _retryCount.text == '') {
+      if (_timeFrame == '' || _provider.text == '' || _retryCount.text == '') {
         snackBarMessage = 'Input fields are not completed';
         return;
       }
@@ -73,7 +71,7 @@ class _BotOptionsState extends State<BotOptions> {
         _isSubmitting = true;
       });
 
-      var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "Provider": _provider.text, "ShouldSkipOnParallelPositionRequest": _shouldSkipOnParallelPositionRequest as bool, "RetryCount": int.parse(_retryCount.text)};
+      var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "Provider": _provider.text, "ShouldSkipOnParallelPositionRequest": _shouldSkipOnParallelPositionRequest, "RetryCount": int.parse(_retryCount.text)};
 
       http.Response res = await http.patch(Uri.parse(backendUrl + 'bot-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
 
@@ -123,36 +121,30 @@ class _BotOptionsState extends State<BotOptions> {
             ),
           ),
           space,
-          Checkbox(
-            semanticLabel: 'Should Skip On Parallel Position Request',
-            value: _shouldSkipOnParallelPositionRequest,
-            onChanged: (value) {
-              if (_shouldSkipOnParallelPositionRequest == null)
-                _shouldSkipOnParallelPositionRequest = true;
-              else
-                _shouldSkipOnParallelPositionRequest = !_shouldSkipOnParallelPositionRequest!;
-            },
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Should Skip On Parallel Position Request'),
+              Switch(
+                value: _shouldSkipOnParallelPositionRequest,
+                onChanged: (bool value) => setState(() => _shouldSkipOnParallelPositionRequest = value),
+              ),
+            ],
           ),
           space,
-          Autocomplete<String>(
-            initialValue: _timeFrameDefault,
-            optionsBuilder: (TextEditingValue textEditingValue) => AppStaticData.TimeFrames.keys.where((timeFrame) => timeFrame.toLowerCase().contains(textEditingValue.text.toLowerCase())),
-            onSelected: (String selection) => _timeFrame = selection,
-            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextField(
-              controller: textEditingController,
-              focusNode: focusNode,
-              onEditingComplete: onFieldSubmitted,
-              enabled: !_isSubmitting,
-              decoration: InputDecoration(
-                labelText: "Time Frame",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
-                ),
-              ),
-            ),
+          DropdownButton(
+            isExpanded: true,
+            value: _timeFrame,
+            elevation: 16,
+            items: AppStaticData.TimeFrames.map<String, DropdownMenuItem<String>>((k, v) {
+              return MapEntry(
+                  k,
+                  DropdownMenuItem<String>(
+                    value: k,
+                    child: Text(k),
+                  ));
+            }).values.toList(),
+            onChanged: (a) => setState(() => _timeFrame = a),
           ),
           space,
           TextField(
