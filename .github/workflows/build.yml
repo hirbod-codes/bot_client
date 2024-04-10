@@ -1,4 +1,4 @@
-name: Build mobile apps
+name: Build
 on:
   workflow_dispatch:
   push:
@@ -165,12 +165,6 @@ jobs:
           path: artifacts
 
       - run: zip -r -9 assets.zip artifacts/
-
-      - run: ls -a .
-      - run: ls -a $GITHUB_WORKSPACE/artifacts
-      - run: ls -a $GITHUB_WORKSPACE/
-      - run: ls -a artifacts/android-build
-      - run: ls -a artifacts/ios-build
 
       - name: "Generate release changelog"
         id: changelog_generator
