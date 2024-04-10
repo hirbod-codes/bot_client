@@ -196,5 +196,4 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            artifacts/android-build/app-release.aab
-            artifacts/ios-build/*
+            artifacts/*
