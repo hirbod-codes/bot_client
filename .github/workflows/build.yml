@@ -58,7 +58,12 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ios-build
-          path: /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/iphoneos/Runner.app/,build/
+          path: /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/iphoneos/Runner.app/
+      
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ios-build
+          path: build/
   build-web:
     name: Build-web
     runs-on: ubuntu-latest
@@ -94,7 +99,6 @@ jobs:
           target: web
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64,linux/arm,darwin/amd64,darwin/arm64,darwin/arm,windows/amd64,windows/arm64,windows/arm
   build-linux:
     name: Build-linux
     runs-on: ubuntu-latest
