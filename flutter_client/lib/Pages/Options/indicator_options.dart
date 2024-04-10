@@ -19,8 +19,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
   var _atrMultiplier = TextEditingController();
   var _superTrendPeriod = TextEditingController();
   var _superTrendMultiplier = TextEditingController();
-  var _superTrendCandlePart = '';
-  var _superTrendCandlePartDefault = TextEditingValue();
+  String? _superTrendCandlePart = AppStaticData.CandleParts.keys.first;
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
@@ -32,7 +31,6 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
 
     setState(() {
       _superTrendCandlePart = cp;
-      _superTrendCandlePartDefault = TextEditingValue(text: cp);
 
       _atrPeriod.text = options['atr']['period']?.toString() ?? '';
       _atrMultiplier.text = options['atrMultiplier']?.toString() ?? '';
@@ -185,25 +183,19 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
             ),
           ),
           space,
-          Autocomplete<String>(
-            initialValue: _superTrendCandlePartDefault,
-            optionsBuilder: (TextEditingValue textEditingValue) => AppStaticData.CandleParts.keys, //.where((candlePart) => candlePart.toLowerCase().contains(textEditingValue.text.toLowerCase())),
-            onSelected: (String selection) => _superTrendCandlePart = selection,
-            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextField(
-              controller: textEditingController,
-              focusNode: focusNode,
-              onEditingComplete: onFieldSubmitted,
-              enabled: !_isSubmitting,
-              decoration: InputDecoration(
-                labelText: "Super Trend Source",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
-                ),
-              ),
-            ),
+          DropdownButton(
+            isExpanded: true,
+            value: _superTrendCandlePart,
+            elevation: 16,
+            items: AppStaticData.CandleParts.map<String, DropdownMenuItem<String>>((k, v) {
+              return MapEntry(
+                  k,
+                  DropdownMenuItem<String>(
+                    value: k,
+                    child: Text(k),
+                  ));
+            }).values.toList(),
+            onChanged: (a) => setState(() => _superTrendCandlePart = a),
           ),
           space,
           SizedBox(

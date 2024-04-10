@@ -33,7 +33,10 @@ class _HomePageState extends State<HomePage> {
       });
 
       String? backendUrl = await AppDataRepository.GetBackendUrl();
-      if (backendUrl == null) return;
+      if (backendUrl == null) {
+        snackBarMessage = 'No URL provided!';
+        return;
+      }
 
       var res = await http.get(Uri.parse(backendUrl + 'status/'));
 
@@ -56,11 +59,12 @@ class _HomePageState extends State<HomePage> {
             child: Icon(Icons.refresh),
           );
 
-        App.showSnackBar(
-          snackBarMessage,
-          'Close',
-          () {},
-        );
+        if (snackBarMessage != '')
+          App.showSnackBar(
+            snackBarMessage,
+            'Close',
+            () {},
+          );
       });
     }
   }
@@ -173,8 +177,8 @@ class _HomePageState extends State<HomePage> {
               child: _loading || _isSubmitting ? CircularProgressIndicator() : _status,
             ),
             space,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Wrap(
+              direction: Axis.horizontal,
               children: [
                 ElevatedButton(
                   onPressed: _start,
@@ -207,7 +211,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ],
-            )
+            ),
+            space,
           ],
         ),
       ),
