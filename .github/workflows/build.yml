@@ -59,7 +59,7 @@ jobs:
       - run: mv build/ios/iphoneos/Runner.app/ build/ios/iphoneos/Payload/
 
       - run: zip -qq -r -9 FlutterIpaExport.ipa Payload
-        working-directory: build/ios/iphoneos
+        working-directory: ./flutter_client/build/ios/iphoneos
 
       - run: mkdir ../build
       - run: cp build/ios/iphoneos/Payload/FlutterIpaExport.ipa ../build
