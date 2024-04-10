@@ -58,7 +58,7 @@ jobs:
       - run: zip -r -9 FlutterIpaExport.ipa build/ios/iphoneos/Runner.app/
 
       - run: mkdir ../build
-      - run: cp build/ios/iphoneos/Runner.app/FlutterIpaExport.ipa ../build
+      - run: cp FlutterIpaExport.ipa ../build
       
       - uses: actions/upload-artifact@v3
         with:
