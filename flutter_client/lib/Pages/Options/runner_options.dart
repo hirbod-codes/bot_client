@@ -15,8 +15,7 @@ class RunnerOptions extends StatefulWidget {
 }
 
 class _RunnerOptionsState extends State<RunnerOptions> {
-  String _timeFrame = '';
-  var _timeFrameDefault = TextEditingValue(text: '');
+  String? _timeFrame = AppStaticData.TimeFrames.keys.first;
   var _historicalCandlesCount = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
@@ -29,7 +28,6 @@ class _RunnerOptionsState extends State<RunnerOptions> {
 
     setState(() {
       _timeFrame = tf;
-      _timeFrameDefault = TextEditingValue(text: tf);
       _historicalCandlesCount.text = options['historicalCandlesCount']?.toString() ?? '';
     });
   }
@@ -120,25 +118,19 @@ class _RunnerOptionsState extends State<RunnerOptions> {
             ),
           ),
           space,
-          Autocomplete<String>(
-            initialValue: _timeFrameDefault,
-            optionsBuilder: (TextEditingValue textEditingValue) => AppStaticData.TimeFrames.keys.where((timeFrame) => timeFrame.toLowerCase().contains(textEditingValue.text.toLowerCase())),
-            onSelected: (String selection) => _timeFrame = selection,
-            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextField(
-              controller: textEditingController,
-              focusNode: focusNode,
-              onEditingComplete: onFieldSubmitted,
-              enabled: !_isSubmitting,
-              decoration: InputDecoration(
-                labelText: "Time Frame",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
-                ),
-              ),
-            ),
+          DropdownButton(
+            isExpanded: true,
+            value: _timeFrame,
+            elevation: 16,
+            items: AppStaticData.TimeFrames.map<String, DropdownMenuItem<String>>((k, v) {
+              return MapEntry(
+                  k,
+                  DropdownMenuItem<String>(
+                    value: k,
+                    child: Text(k),
+                  ));
+            }).values.toList(),
+            onChanged: (a) => setState(() => _timeFrame = a),
           ),
           space,
           SizedBox(
