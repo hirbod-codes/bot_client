@@ -49,16 +49,20 @@ jobs:
           architecture: x64
 
       - run: flutter pub get
+
+      - run: pod repo update
+        working-directory: ./flutter_client/ios
+
       - run: flutter build ios --release --no-codesign
 
-      - run: cp -r ./build ../build
+      - run: mkdir build/ios/Payload
+      - run: mv build/ios/iphoneos/Runner.app/ build/ios/iphoneos/Payload/
 
-      - run: ls -a build/
-      
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ios-build
-          path: /Users/runner/work/bot_client/bot_client/flutter_client/build/ios/iphoneos/Runner.app/
+      - run: zip -qq -r -9 FlutterIpaExport.ipa Payload
+        working-directory: build/ios/iphoneos
+
+      - run: mkdir ../build
+      - run: cp build/ios/iphoneos/Payload/FlutterIpaExport.ipa ../build
       
       - uses: actions/upload-artifact@v3
         with:
@@ -67,6 +71,9 @@ jobs:
   build-web:
     name: Build-web
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     defaults:
       run:
         working-directory: ./flutter_client
