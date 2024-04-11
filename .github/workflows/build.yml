@@ -59,7 +59,7 @@ jobs:
 
       - run: mkdir ../build
       - run: cp FlutterIpaExport.ipa ../build
-      
+
       - uses: actions/upload-artifact@v3
         with:
           name: ios-build
@@ -166,23 +166,20 @@ jobs:
 
       - run: zip -r -9 assets.zip artifacts/
 
-      - name: "Generate release changelog"
-        id: changelog_generator
+      - id: changelog_generator
         uses: heinrichreimer/action-github-changelog-generator@v2.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           unreleased: false
 
-      - name: Bump version and push tag
-        id: tag_version
+      - id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: true
           default_prerelease_bump: false
 
-      - name: Create Release
-        id: create_release
+      - id: create_release
         uses: softprops/action-gh-release@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

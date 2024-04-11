@@ -18,7 +18,7 @@ class SettingsPage extends StatefulWidget {
     String? backendUrl = await AppDataRepository.GetBackendUrl();
     if (backendUrl == null) return null;
 
-    return (await http.get(Uri.parse(backendUrl + 'options/'), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''})).body;
+    return (await http.get(Uri.parse(backendUrl + 'options/'), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''})).body;
   }
 
   @override
