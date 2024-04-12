@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_client/Data/AppData.dart';
@@ -38,7 +39,7 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      var res = await http.get(Uri.parse(backendUrl + 'status/'));
+      var res = await http.get(Uri.parse(backendUrl + 'status/'), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       if (res.statusCode == 200) {
         wasSuccessful = true;
@@ -92,7 +93,7 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      http.Response res = await http.post(Uri.parse(backendUrl + "${action}/"));
+      http.Response res = await http.post(Uri.parse(backendUrl + "${action}/"), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -186,8 +187,8 @@ class _HomePageState extends State<HomePage> {
                   style: ElevatedButton.styleFrom(
                     shape: CircleBorder(),
                     padding: EdgeInsets.all(40),
-                    backgroundColor: Colors.blue, // <-- Button color
-                    foregroundColor: Colors.white, // <-- Splash color
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
                   ),
                 ),
                 ElevatedButton(
@@ -196,8 +197,8 @@ class _HomePageState extends State<HomePage> {
                   style: ElevatedButton.styleFrom(
                     shape: CircleBorder(),
                     padding: EdgeInsets.all(40),
-                    backgroundColor: Colors.yellow, // <-- Button color
-                    foregroundColor: Colors.black, // <-- Splash color
+                    backgroundColor: Colors.yellow,
+                    foregroundColor: Colors.black,
                   ),
                 ),
                 ElevatedButton(
@@ -206,8 +207,8 @@ class _HomePageState extends State<HomePage> {
                   style: ElevatedButton.styleFrom(
                     shape: CircleBorder(),
                     padding: EdgeInsets.all(40),
-                    backgroundColor: Colors.red, // <-- Button color
-                    foregroundColor: Colors.black, // <-- Splash color
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.black,
                   ),
                 ),
               ],

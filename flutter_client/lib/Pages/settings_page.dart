@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_client/Data/AppData.dart';
 import 'package:flutter_client/Pages/Options/bot_options.dart';
@@ -16,7 +18,7 @@ class SettingsPage extends StatefulWidget {
     String? backendUrl = await AppDataRepository.GetBackendUrl();
     if (backendUrl == null) return null;
 
-    return (await http.get(Uri.parse(backendUrl + 'options/'))).body;
+    return (await http.get(Uri.parse(backendUrl + 'options/'), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''})).body;
   }
 
   @override

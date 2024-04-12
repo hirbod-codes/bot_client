@@ -81,7 +81,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
 
       var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "Symbol": _symbol.text, "BrokerCommission": double.parse(_brokerCommission.text), "BaseUrl": _baseUrl.text, "ApiKey": _apiKey.text, "ApiSecret": _apiSecret.text};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -192,17 +192,19 @@ class _BrokerOptionsState extends State<BrokerOptions> {
             ),
           ),
           space,
+          Text('Time Frame'),
           DropdownButton(
             isExpanded: true,
             value: _timeFrame,
             elevation: 16,
             items: AppStaticData.TimeFrames.map<String, DropdownMenuItem<String>>((k, v) {
               return MapEntry(
-                  k,
-                  DropdownMenuItem<String>(
-                    value: k,
-                    child: Text(k),
-                  ));
+                k,
+                DropdownMenuItem<String>(
+                  value: k,
+                  child: Text(k),
+                ),
+              );
             }).values.toList(),
             onChanged: (a) => setState(() => _timeFrame = a),
           ),

@@ -73,7 +73,7 @@ class _BotOptionsState extends State<BotOptions> {
 
       var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "Provider": _provider.text, "ShouldSkipOnParallelPositionRequest": _shouldSkipOnParallelPositionRequest, "RetryCount": int.parse(_retryCount.text)};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'bot-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType});
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'bot-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -121,17 +121,20 @@ class _BotOptionsState extends State<BotOptions> {
             ),
           ),
           space,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Should Skip On Parallel Position Request'),
-              Switch(
-                value: _shouldSkipOnParallelPositionRequest,
-                onChanged: (bool value) => setState(() => _shouldSkipOnParallelPositionRequest = value),
-              ),
-            ],
+          Flexible(
+            child: Wrap(
+              direction: Axis.horizontal,
+              children: [
+                Text('Should Skip On Parallel Position Request'),
+                Switch(
+                  value: _shouldSkipOnParallelPositionRequest,
+                  onChanged: (bool value) => setState(() => _shouldSkipOnParallelPositionRequest = value),
+                ),
+              ],
+            ),
           ),
           space,
+          Text('Time Frame'),
           DropdownButton(
             isExpanded: true,
             value: _timeFrame,
