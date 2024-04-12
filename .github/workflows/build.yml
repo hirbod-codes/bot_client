@@ -82,6 +82,8 @@ jobs:
       - run: flutter pub get
       - run: flutter build web
 
+      - run: ls -al build/web/
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
