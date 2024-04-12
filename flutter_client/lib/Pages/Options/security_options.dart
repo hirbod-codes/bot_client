@@ -49,6 +49,12 @@ class SecurityOptionsState extends State<SecurityOptions> {
       bool result = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.Options, options);
 
       if (result == true) snackBarMessage = 'Successful';
+    } catch (e) {
+      App.showSnackBar(
+        'Error: ' + e.toString(),
+        'Close',
+        () {},
+      );
     } finally {
       App.showSnackBar(
         snackBarMessage,
