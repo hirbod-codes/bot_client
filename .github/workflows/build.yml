@@ -115,8 +115,8 @@ jobs:
           push: true
           context: ./
           file: ./Dockerfile
-          tags: ${{ steps.bot_image_meta.outputs.tags }}
-          labels: ${{ steps.bot_image_meta.outputs.labels }}
+          tags: ${{ steps.bot_client_image_meta.outputs.tags }}
+          labels: ${{ steps.bot_client_image_meta.outputs.labels }}
           target: web
           cache-from: type=gha
           cache-to: type=gha,mode=max
