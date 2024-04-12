@@ -35,10 +35,16 @@ class SecurityOptionsState extends State<SecurityOptions> {
       bool? BackendPortResult = await (await AppStaticData.getSharedPreferences()).setInt(AppDataKeys.BackendPort, int.parse(_port.text));
       bool? BackendAuthKeyResult = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.BackendAuthKey, _apiKey.text);
 
-      if (BackendDomainResult != true || BackendPortResult != true || BackendAuthKeyResult != true) return;
+      if (BackendDomainResult != true || BackendPortResult != true || BackendAuthKeyResult != true) {
+        snackBarMessage = 'failed to store input.';
+        return;
+      }
 
       String? options = await SettingsPage.getOptions();
-      if (options == null) return;
+      if (options == null) {
+        snackBarMessage = 'failed to fetch options.';
+        return;
+      }
 
       bool result = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.Options, options);
 
