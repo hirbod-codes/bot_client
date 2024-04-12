@@ -80,7 +80,7 @@ jobs:
           channel: stable
 
       - run: flutter pub get
-      - run: flutter build web
+      - run: flutter build web --base-href /web/
 
       - run: ls -al build/web/
 
