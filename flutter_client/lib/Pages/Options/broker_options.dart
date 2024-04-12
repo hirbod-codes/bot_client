@@ -81,7 +81,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
 
       var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "Symbol": _symbol.text, "BrokerCommission": double.parse(_brokerCommission.text), "BaseUrl": _baseUrl.text, "ApiKey": _apiKey.text, "ApiSecret": _apiSecret.text};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      http.Response res = await getClient().patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;

@@ -80,7 +80,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
         "SuperTrendOptions": {"Period": int.parse(_superTrendPeriod.text), "Multiplier": double.parse(_superTrendMultiplier.text), "CandlePart": AppStaticData.CandleParts[_superTrendCandlePart], "ChangeATRCalculationMethod": true}
       };
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'indicator-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      http.Response res = await getClient().patch(Uri.parse(backendUrl + 'indicator-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;

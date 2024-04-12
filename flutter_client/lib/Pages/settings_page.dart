@@ -9,7 +9,6 @@ import 'package:flutter_client/Pages/Options/risk_management_options.dart';
 import 'package:flutter_client/Pages/Options/runner_options.dart';
 import 'package:flutter_client/Pages/Options/security_options.dart';
 import 'package:flutter_client/Pages/Options/strategy_options.dart';
-import 'package:http/http.dart' as http;
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -18,7 +17,7 @@ class SettingsPage extends StatefulWidget {
     String? backendUrl = await AppDataRepository.GetBackendUrl();
     if (backendUrl == null) return null;
 
-    return (await http.get(Uri.parse(backendUrl + 'options/'), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''})).body;
+    return (await getClient().get(Uri.parse(backendUrl + 'options/'), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''})).body;
   }
 
   @override

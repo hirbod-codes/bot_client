@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      var res = await http.get(Uri.parse(backendUrl + 'status/'), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      var res = await getClient().get(Uri.parse(backendUrl + 'status/'), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       if (res.statusCode == 200) {
         wasSuccessful = true;
@@ -93,7 +93,7 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      http.Response res = await http.post(Uri.parse(backendUrl + "${action}/"), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      http.Response res = await getClient().post(Uri.parse(backendUrl + "${action}/"), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;

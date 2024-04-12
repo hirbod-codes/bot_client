@@ -62,7 +62,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
 
       var data = {"ProviderName": _providerName.text};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'strategy-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      http.Response res = await getClient().patch(Uri.parse(backendUrl + 'strategy-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
