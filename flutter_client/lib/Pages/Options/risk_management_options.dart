@@ -74,7 +74,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
 
       var data = {"Margin": double.parse(_margin.text), "Leverage": double.parse(_leverage.text), "SLPercentages": double.parse(_sLPercentages.text), "RiskRewardRatio": double.parse(_riskRewardRatio.text), "BrokerCommission": double.parse(_brokerCommission.text), "BrokerMaximumLeverage": double.parse(_brokerMaximumLeverage.text), "CommissionPercentage": double.parse(_commissionPercentage.text)};
 
-      http.Response res = await getClient().patch(Uri.parse(backendUrl + 'risk-management-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'risk-management-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
