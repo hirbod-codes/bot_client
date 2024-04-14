@@ -126,9 +126,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text("Bot"),
-        elevation: 3,
         actions: [
           FloatingActionButton(
               onPressed: _getStatus,
