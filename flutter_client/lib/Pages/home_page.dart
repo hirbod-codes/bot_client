@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_client/Data/AppData.dart';
+import 'package:flutter_client/Data/app_data.dart';
+import 'package:flutter_client/Pages/Charts/line_chart.dart';
 import 'package:flutter_client/main.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,8 +15,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Widget _status = Icon(Icons.question_mark);
+  Widget Function(dynamic context) _status = (context) => const Icon(Icons.question_mark_outlined, size: 50);
+
   bool _loading = false;
+
+  bool _isSubmitting = false;
+
+  String _selectedStatus = "";
 
   void _start() => _submit('start');
 
@@ -33,19 +39,33 @@ class _HomePageState extends State<HomePage> {
         _loading = true;
       });
 
+      await Future.delayed(const Duration(seconds: 1));
+
       String? backendUrl = await AppDataRepository.GetBackendUrl();
       if (backendUrl == null) {
         snackBarMessage = 'No URL provided!';
         return;
       }
 
-      var res = await http.get(Uri.parse(backendUrl + 'status/'), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      var res = await http.get(Uri.parse('${backendUrl}status/'), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
       if (res.statusCode == 200) {
         wasSuccessful = true;
         snackBarMessage = 'Successful';
         setState(() {
-          if (res.body != '') _status = Text(jsonDecode(res.body)['status']);
+          if (res.body != '') _status = (context) => Text(jsonDecode(res.body)['status'], style: Theme.of(context).textTheme.titleLarge);
+          switch (jsonDecode(res.body)['status']) {
+            case 'RUNNING':
+              _selectedStatus = 'start';
+              break;
+            case 'SUSPENDED':
+              _selectedStatus = 'suspend';
+              break;
+            case 'STOPPED':
+              _selectedStatus = 'stop';
+              break;
+            default:
+          }
         });
         return;
       }
@@ -54,28 +74,33 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _loading = false;
 
-        if (!wasSuccessful)
-          _status = FloatingActionButton(
-            onPressed: _getStatus,
-            child: Icon(Icons.refresh),
-          );
+        if (!wasSuccessful) {
+          _status = (context) => SizedBox(
+                width: 35,
+                height: 35,
+                child: FloatingActionButton(
+                  onPressed: _getStatus,
+                  child: const Icon(Icons.refresh_outlined),
+                ),
+              );
+        }
 
-        if (snackBarMessage != '')
+        if (snackBarMessage != '') {
           App.showSnackBar(
             snackBarMessage,
             'Close',
             () {},
           );
+        }
       });
     }
   }
 
+  @override
   void initState() {
     super.initState();
     _getStatus();
   }
-
-  bool _isSubmitting = false;
 
   void _submit(String action) async {
     if (_isSubmitting) return;
@@ -93,129 +118,107 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      http.Response res = await http.post(Uri.parse(backendUrl + "${action}/"), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      http.Response res = await http.post(Uri.parse("$backendUrl$action/"), headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
-      Map<String, dynamic>? responseObject = null;
+      Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
 
       if (res.statusCode == 200) {
         wasSuccessful = true;
         snackBarMessage = 'Successful';
-      } else
+      } else {
         snackBarMessage = responseObject?['message'] ?? 'Error';
+      }
     } finally {
       _getStatus();
       setState(() {
         _isSubmitting = false;
-        if (wasSuccessful)
+        if (wasSuccessful) {
           App.showSnackBar(
             snackBarMessage,
             'Close',
             () {},
           );
+        }
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    var space = SizedBox(
-      width: 10,
-      height: 35,
-    );
-
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text("Bot"),
-        elevation: 3,
+        title: const Text("Home"),
         actions: [
-          FloatingActionButton(
-              onPressed: _getStatus,
-              child: Icon(
-                Icons.refresh,
-              )),
+          SizedBox(
+            height: 35,
+            width: 35,
+            child: FloatingActionButton(
+              onPressed: () {},
+              child: const Icon(Icons.refresh_outlined),
+            ),
+          ),
         ],
       ),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            DrawerHeader(
-              child: Icon(
-                Icons.android,
-                size: 48,
+      body: ListView(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+                child: Text('Status', style: Theme.of(context).textTheme.copyWith(bodyMedium: const TextStyle(color: Colors.grey)).bodyMedium),
               ),
-            ),
-            ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/home');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/settings');
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            space,
-            Center(
-              child: Text('Status'),
-            ),
-            Center(
-              child: _loading || _isSubmitting ? CircularProgressIndicator() : _status,
-            ),
-            space,
-            Wrap(
-              direction: Axis.horizontal,
-              children: [
-                ElevatedButton(
-                  onPressed: _start,
-                  child: _isSubmitting ? CircularProgressIndicator() : Text('Start'),
-                  style: ElevatedButton.styleFrom(
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(40),
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: (_loading || _isSubmitting) ? const CircularProgressIndicator() : _status(context),
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              Center(
+                child: SegmentedButton(
+                  showSelectedIcon: false,
+                  emptySelectionAllowed: true,
+                  segments: const [
+                    ButtonSegment(enabled: true, value: 'start', label: Text('Start'), icon: Icon(Icons.play_arrow_outlined)),
+                    ButtonSegment(enabled: true, value: 'suspend', label: Text('Suspend'), icon: Icon(Icons.pause_outlined)),
+                    ButtonSegment(enabled: true, value: 'stop', label: Text('Stop'), icon: Icon(Icons.stop_outlined)),
+                  ],
+                  selected: <String>{_selectedStatus},
+                  onSelectionChanged: (s) {
+                    switch (s.first) {
+                      case 'start':
+                        _start();
+                        break;
+                      case 'suspend':
+                        _suspend();
+                        break;
+                      case 'stop':
+                        _stop();
+                        break;
+                      default:
+                    }
+                    setState(() {
+                      _selectedStatus = s.first;
+                    });
+                  },
                 ),
-                ElevatedButton(
-                  onPressed: _suspend,
-                  child: _isSubmitting ? CircularProgressIndicator() : Text('Suspend'),
-                  style: ElevatedButton.styleFrom(
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(40),
-                    backgroundColor: Colors.yellow,
-                    foregroundColor: Colors.black,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: _stop,
-                  child: _isSubmitting ? CircularProgressIndicator() : Text('Stop'),
-                  style: ElevatedButton.styleFrom(
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(40),
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-            space,
-          ],
-        ),
+              ),
+              const SizedBox(
+                height: 90,
+              ),
+              CurrencyChart(
+                fSymbol: 'BTC',
+                tSymbol: 'USDT',
+                lineColor: Colors.yellow.shade700,
+                gradientColor: Colors.yellow,
+                tooltipColor: Theme.of(context).colorScheme.secondary,
+                lineTooltipItemTextStyle: Theme.of(context).textTheme.bodySmall!,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
