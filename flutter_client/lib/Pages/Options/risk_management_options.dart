@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_client/Data/AppData.dart';
+import 'package:flutter_client/Data/app_data.dart';
 import 'package:flutter_client/Pages/settings_page.dart';
 import 'package:flutter_client/main.dart';
 import 'package:http/http.dart' as http;
@@ -74,7 +74,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
 
       var data = {"Margin": double.parse(_margin.text), "Leverage": double.parse(_leverage.text), "SLPercentages": double.parse(_sLPercentages.text), "RiskRewardRatio": double.parse(_riskRewardRatio.text), "BrokerCommission": double.parse(_brokerCommission.text), "BrokerMaximumLeverage": double.parse(_brokerMaximumLeverage.text), "CommissionPercentage": double.parse(_commissionPercentage.text)};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'risk-management-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'risk-management-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;

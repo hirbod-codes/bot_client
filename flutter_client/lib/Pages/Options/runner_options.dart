@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_client/Data/AppData.dart';
+import 'package:flutter_client/Data/app_data.dart';
 import 'package:flutter_client/Pages/settings_page.dart';
 import 'package:flutter_client/main.dart';
 import 'package:http/http.dart' as http;
@@ -15,14 +15,14 @@ class RunnerOptions extends StatefulWidget {
 }
 
 class _RunnerOptionsState extends State<RunnerOptions> {
-  String? _timeFrame = AppStaticData.TimeFrames.keys.first;
+  String? _timeFrame = AppStaticData.timeFrames.keys.first;
   var _historicalCandlesCount = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
 
     String tf = '';
-    AppStaticData.TimeFrames.forEach((key, value) {
+    AppStaticData.timeFrames.forEach((key, value) {
       if (options['timeFrame'] != null && value == (options['timeFrame'] as int)) tf = key;
     });
 
@@ -67,9 +67,9 @@ class _RunnerOptionsState extends State<RunnerOptions> {
         _isSubmitting = true;
       });
 
-      var data = {"TimeFrame": AppStaticData.TimeFrames[_timeFrame], "HistoricalCandlesCount": int.parse(_historicalCandlesCount.text)};
+      var data = {"TimeFrame": AppStaticData.timeFrames[_timeFrame], "HistoricalCandlesCount": int.parse(_historicalCandlesCount.text)};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'runner-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'runner-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -123,14 +123,17 @@ class _RunnerOptionsState extends State<RunnerOptions> {
             isExpanded: true,
             value: _timeFrame,
             elevation: 16,
-            items: AppStaticData.TimeFrames.map<String, DropdownMenuItem<String>>((k, v) {
-              return MapEntry(
-                  k,
-                  DropdownMenuItem<String>(
-                    value: k,
-                    child: Text(k),
-                  ));
-            }).values.toList(),
+            items: AppStaticData.timeFrames
+                .map<String, DropdownMenuItem<String>>((k, v) {
+                  return MapEntry(
+                      k,
+                      DropdownMenuItem<String>(
+                        value: k,
+                        child: Text(k),
+                      ));
+                })
+                .values
+                .toList(),
             onChanged: (a) => setState(() => _timeFrame = a),
           ),
           space,
