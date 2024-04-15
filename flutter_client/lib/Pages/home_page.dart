@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_client/Data/app_data.dart';
 import 'package:flutter_client/Pages/Charts/line_chart.dart';
+import 'package:flutter_client/Themes/theme.dart';
 import 'package:flutter_client/main.dart';
 import 'package:http/http.dart' as http;
 
@@ -150,6 +151,15 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("Home"),
         actions: [
+          SizedBox(
+            height: 70,
+            width: 70,
+            child: Switch(
+              thumbIcon: MaterialStateProperty.all(const Icon(Icons.light_mode_outlined)),
+              value: customTheme.themeMode == ThemeMode.light,
+              onChanged: (bool value) => customTheme.toggleTheme(),
+            ),
+          ),
           SizedBox(
             height: 35,
             width: 35,
