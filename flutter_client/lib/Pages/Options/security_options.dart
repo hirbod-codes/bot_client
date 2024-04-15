@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_client/Data/AppData.dart';
+import 'package:flutter_client/Data/app_data.dart';
 import 'package:flutter_client/Pages/settings_page.dart';
 import 'package:flutter_client/main.dart';
 
@@ -11,10 +11,11 @@ class SecurityOptions extends StatefulWidget {
 }
 
 class SecurityOptionsState extends State<SecurityOptions> {
-  var _domain = TextEditingController();
-  var _port = TextEditingController();
-  var _apiKey = TextEditingController();
+  final _domain = TextEditingController();
+  final _port = TextEditingController();
+  final _apiKey = TextEditingController();
 
+  @override
   void initState() {
     initAsync().then((value) {
       super.initState();
@@ -22,20 +23,20 @@ class SecurityOptionsState extends State<SecurityOptions> {
   }
 
   Future<void> initAsync() async {
-    _domain.text = (await AppStaticData.getSharedPreferences()).getString(AppDataKeys.BackendDomain) ?? '';
-    _port.text = (await AppStaticData.getSharedPreferences()).getInt(AppDataKeys.BackendPort)?.toString() ?? '';
-    _apiKey.text = (await AppStaticData.getSharedPreferences()).getString(AppDataKeys.BackendAuthKey) ?? '';
+    _domain.text = (await AppStaticData.getSharedPreferences()).getString(AppDataKeys.backendDomain) ?? '';
+    _port.text = (await AppStaticData.getSharedPreferences()).getInt(AppDataKeys.backendPort)?.toString() ?? '';
+    _apiKey.text = (await AppStaticData.getSharedPreferences()).getString(AppDataKeys.backendAuthKey) ?? '';
   }
 
   Future<void> _submit() async {
     String snackBarMessage = 'Error';
 
     try {
-      bool? BackendDomainResult = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.BackendDomain, _domain.text);
-      bool? BackendPortResult = await (await AppStaticData.getSharedPreferences()).setInt(AppDataKeys.BackendPort, int.parse(_port.text));
-      bool? BackendAuthKeyResult = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.BackendAuthKey, _apiKey.text);
+      bool? backendDomainResult = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.backendDomain, _domain.text);
+      bool? backendPortResult = await (await AppStaticData.getSharedPreferences()).setInt(AppDataKeys.backendPort, int.parse(_port.text));
+      bool? backendAuthKeyResult = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.backendAuthKey, _apiKey.text);
 
-      if (BackendDomainResult != true || BackendPortResult != true || BackendAuthKeyResult != true) {
+      if (backendDomainResult != true || backendPortResult != true || backendAuthKeyResult != true) {
         snackBarMessage = 'failed to store input.';
         return;
       }
@@ -46,15 +47,9 @@ class SecurityOptionsState extends State<SecurityOptions> {
         return;
       }
 
-      bool result = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.Options, options);
+      bool result = await (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.options, options);
 
       if (result == true) snackBarMessage = 'Successful';
-    } catch (e) {
-      App.showSnackBar(
-        'Error: ' + e.toString(),
-        'Close',
-        () {},
-      );
     } finally {
       App.showSnackBar(
         snackBarMessage,
@@ -66,7 +61,7 @@ class SecurityOptionsState extends State<SecurityOptions> {
 
   @override
   Widget build(BuildContext context) {
-    var space = SizedBox(
+    var space = const SizedBox(
       width: 10,
       height: 35,
     );
@@ -79,7 +74,7 @@ class SecurityOptionsState extends State<SecurityOptions> {
             TextField(
               controller: _domain,
               keyboardType: TextInputType.url,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Domain",
                 hintText: "example.com or an IP address",
                 border: OutlineInputBorder(
@@ -94,7 +89,7 @@ class SecurityOptionsState extends State<SecurityOptions> {
             TextField(
               controller: _port,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Port",
                 hintText: "443",
                 border: OutlineInputBorder(
@@ -108,7 +103,7 @@ class SecurityOptionsState extends State<SecurityOptions> {
             space,
             TextField(
               controller: _apiKey,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Api Authentication Key",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.only(
@@ -119,11 +114,11 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
             space,
-            SizedBox(
+            const SizedBox(
               height: 70,
               width: 10,
             ),
-            ElevatedButton(onPressed: _submit, child: Text('Update')),
+            ElevatedButton(onPressed: _submit, child: const Text('Update')),
           ],
         ),
       ),

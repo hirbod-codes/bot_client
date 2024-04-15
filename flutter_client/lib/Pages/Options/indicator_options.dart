@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_client/Data/AppData.dart';
+import 'package:flutter_client/Data/app_data.dart';
 import 'package:flutter_client/Pages/settings_page.dart';
 import 'package:flutter_client/main.dart';
 import 'package:http/http.dart' as http;
@@ -19,13 +19,13 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
   var _atrMultiplier = TextEditingController();
   var _superTrendPeriod = TextEditingController();
   var _superTrendMultiplier = TextEditingController();
-  String? _superTrendCandlePart = AppStaticData.CandleParts.keys.first;
+  String? _superTrendCandlePart = AppStaticData.candleParts.keys.first;
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
 
     String cp = '';
-    AppStaticData.CandleParts.forEach((key, value) {
+    AppStaticData.candleParts.forEach((key, value) {
       if (options['superTrendOptions']['candlePart'] != null && value == (options['superTrendOptions']['candlePart'] as int)) cp = key;
     });
 
@@ -77,10 +77,10 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
       var data = {
         "Atr": {"Period": int.parse(_atrPeriod.text), "Source": "close"},
         "AtrMultiplier": double.parse(_atrMultiplier.text),
-        "SuperTrendOptions": {"Period": int.parse(_superTrendPeriod.text), "Multiplier": double.parse(_superTrendMultiplier.text), "CandlePart": AppStaticData.CandleParts[_superTrendCandlePart], "ChangeATRCalculationMethod": true}
+        "SuperTrendOptions": {"Period": int.parse(_superTrendPeriod.text), "Multiplier": double.parse(_superTrendMultiplier.text), "CandlePart": AppStaticData.candleParts[_superTrendCandlePart], "ChangeATRCalculationMethod": true}
       };
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'indicator-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.BackendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse(backendUrl + 'indicator-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject = null;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -188,14 +188,17 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
             isExpanded: true,
             value: _superTrendCandlePart,
             elevation: 16,
-            items: AppStaticData.CandleParts.map<String, DropdownMenuItem<String>>((k, v) {
-              return MapEntry(
-                  k,
-                  DropdownMenuItem<String>(
-                    value: k,
-                    child: Text(k),
-                  ));
-            }).values.toList(),
+            items: AppStaticData.candleParts
+                .map<String, DropdownMenuItem<String>>((k, v) {
+                  return MapEntry(
+                      k,
+                      DropdownMenuItem<String>(
+                        value: k,
+                        child: Text(k),
+                      ));
+                })
+                .values
+                .toList(),
             onChanged: (a) => setState(() => _superTrendCandlePart = a),
           ),
           space,
