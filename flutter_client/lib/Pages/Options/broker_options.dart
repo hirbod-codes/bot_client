@@ -109,15 +109,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    var space = const SizedBox(
-      width: 10,
-      height: 35,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView(
+  Widget build(BuildContext context) => ListView(
         children: [
           TextField(
             controller: _symbol,
@@ -133,7 +125,6 @@ class _BrokerOptionsState extends State<BrokerOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _brokerCommission,
             keyboardType: TextInputType.number,
@@ -149,7 +140,6 @@ class _BrokerOptionsState extends State<BrokerOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _baseUrl,
             enabled: !_isSubmitting,
@@ -165,7 +155,6 @@ class _BrokerOptionsState extends State<BrokerOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _apiKey,
             enabled: !_isSubmitting,
@@ -180,7 +169,6 @@ class _BrokerOptionsState extends State<BrokerOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _apiSecret,
             enabled: !_isSubmitting,
@@ -194,7 +182,6 @@ class _BrokerOptionsState extends State<BrokerOptions> {
               ),
             ),
           ),
-          space,
           const Text('Time Frame'),
           DropdownButton(
             isExpanded: true,
@@ -214,10 +201,6 @@ class _BrokerOptionsState extends State<BrokerOptions> {
                 .toList(),
             onChanged: (a) => setState(() => _timeFrame = a),
           ),
-          const SizedBox(
-            height: 70,
-            width: 10,
-          ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
@@ -227,8 +210,13 @@ class _BrokerOptionsState extends State<BrokerOptions> {
                       child: CircularProgressIndicator(),
                     )
                   : const Text('Update')),
-        ],
-      ),
-    );
-  }
+        ]
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                child: e,
+              ),
+            )
+            .toList(),
+      );
 }

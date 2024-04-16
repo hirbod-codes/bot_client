@@ -100,15 +100,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    var space = const SizedBox(
-      width: 10,
-      height: 35,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView(
+  Widget build(BuildContext context) => ListView(
         children: [
           TextField(
             controller: _margin,
@@ -124,7 +116,6 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _leverage,
             keyboardType: TextInputType.number,
@@ -139,7 +130,6 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _sLPercentages,
             keyboardType: TextInputType.number,
@@ -154,7 +144,6 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _riskRewardRatio,
             keyboardType: TextInputType.number,
@@ -169,7 +158,6 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _brokerCommission,
             keyboardType: TextInputType.number,
@@ -184,7 +172,6 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _brokerMaximumLeverage,
             keyboardType: TextInputType.number,
@@ -199,7 +186,6 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _commissionPercentage,
             keyboardType: TextInputType.number,
@@ -214,11 +200,6 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
               ),
             ),
           ),
-          space,
-          const SizedBox(
-            height: 70,
-            width: 10,
-          ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
@@ -228,8 +209,13 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
                       child: CircularProgressIndicator(),
                     )
                   : const Text('Update')),
-        ],
-      ),
-    );
-  }
+        ]
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                child: e,
+              ),
+            )
+            .toList(),
+      );
 }

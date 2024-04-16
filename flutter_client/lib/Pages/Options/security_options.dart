@@ -60,15 +60,7 @@ class SecurityOptionsState extends State<SecurityOptions> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    var space = const SizedBox(
-      width: 10,
-      height: 35,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView(
+  Widget build(BuildContext context) => ListView(
         children: [
           TextField(
             controller: _domain,
@@ -84,7 +76,6 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _port,
             keyboardType: TextInputType.number,
@@ -99,7 +90,6 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _apiKey,
             decoration: const InputDecoration(
@@ -112,14 +102,17 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
           ),
-          space,
-          const SizedBox(
-            height: 70,
-            width: 10,
+          ElevatedButton(
+            onPressed: _submit,
+            child: const Text('Update'),
           ),
-          ElevatedButton(onPressed: _submit, child: const Text('Update')),
-        ],
-      ),
-    );
-  }
+        ]
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                child: e,
+              ),
+            )
+            .toList(),
+      );
 }

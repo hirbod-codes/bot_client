@@ -99,15 +99,7 @@ class _BotOptionsState extends State<BotOptions> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    var space = const SizedBox(
-      width: 10,
-      height: 35,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView(
+  Widget build(BuildContext context) => ListView(
         children: [
           TextField(
             controller: _provider,
@@ -122,7 +114,6 @@ class _BotOptionsState extends State<BotOptions> {
               ),
             ),
           ),
-          space,
           Flexible(
             child: Wrap(
               alignment: WrapAlignment.spaceBetween,
@@ -136,7 +127,6 @@ class _BotOptionsState extends State<BotOptions> {
               ],
             ),
           ),
-          space,
           const Text('Time Frame'),
           DropdownButton(
             isExpanded: true,
@@ -155,7 +145,6 @@ class _BotOptionsState extends State<BotOptions> {
                 .toList(),
             onChanged: (a) => setState(() => _timeFrame = a),
           ),
-          space,
           TextField(
             controller: _retryCount,
             keyboardType: TextInputType.number,
@@ -170,11 +159,6 @@ class _BotOptionsState extends State<BotOptions> {
               ),
             ),
           ),
-          space,
-          const SizedBox(
-            height: 70,
-            width: 10,
-          ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
@@ -184,8 +168,13 @@ class _BotOptionsState extends State<BotOptions> {
                       child: CircularProgressIndicator(),
                     )
                   : const Text('Update')),
-        ],
-      ),
-    );
-  }
+        ]
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                child: e,
+              ),
+            )
+            .toList(),
+      );
 }

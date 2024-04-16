@@ -95,15 +95,7 @@ class _RunnerOptionsState extends State<RunnerOptions> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    var space = const SizedBox(
-      width: 10,
-      height: 35,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView(
+  Widget build(BuildContext context) => ListView(
         children: [
           TextField(
             controller: _historicalCandlesCount,
@@ -119,7 +111,6 @@ class _RunnerOptionsState extends State<RunnerOptions> {
               ),
             ),
           ),
-          space,
           const Text('Time Frame'),
           DropdownButton(
             isExpanded: true,
@@ -138,11 +129,6 @@ class _RunnerOptionsState extends State<RunnerOptions> {
                 .toList(),
             onChanged: (a) => setState(() => _timeFrame = a),
           ),
-          space,
-          const SizedBox(
-            height: 70,
-            width: 10,
-          ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
@@ -152,8 +138,13 @@ class _RunnerOptionsState extends State<RunnerOptions> {
                       child: CircularProgressIndicator(),
                     )
                   : const Text('Update')),
-        ],
-      ),
-    );
-  }
+        ]
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                child: e,
+              ),
+            )
+            .toList(),
+      );
 }
