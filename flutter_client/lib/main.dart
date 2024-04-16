@@ -84,39 +84,12 @@ class _NavigatorPageState extends State<NavigatorPage> {
             case 0:
               setState(() {
                 _content = _home;
-                // _content = Container(
-                //   decoration: BoxDecoration(
-                //     gradient: RadialGradient(
-                //       radius: 0.75,
-                //       colors: [
-                //         Colors.red,
-                //         Colors.yellow,
-                //         Theme.of(context).colorScheme.primary,
-                //         Theme.of(context).colorScheme.secondary,
-                //       ],
-                //       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
-                //     ),
-                //   ),
-                //   child: _home,
-                // );
                 _index = index;
               });
               break;
             case 1:
               setState(() {
                 _content = _settings;
-                // _content = Container(
-                //   decoration: BoxDecoration(
-                //     gradient: RadialGradient(
-                //       radius: 0.75,
-                //       colors: [
-                //         Theme.of(context).colorScheme.primary,
-                //         Theme.of(context).colorScheme.secondary,
-                //       ],
-                //     ),
-                //   ),
-                //   child: _settings,
-                // );
                 _index = index;
               });
               break;

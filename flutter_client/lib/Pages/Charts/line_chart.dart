@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_client/Data/app_data.dart';
 import 'package:flutter_client/Pages/Models/candle.dart';
+import 'package:flutter_client/Themes/theme.dart';
 import 'package:http/http.dart' as http;
 
 class CurrencyChart extends StatefulWidget {
@@ -102,6 +103,17 @@ class _CurrencyChartState extends State<CurrencyChart> {
     return (yearly['Data']['Data'] as List<dynamic>).asMap().entries.map<Candle>((e) => Candle(e.value['close'].toDouble(), e.value['open'].toDouble(), e.value['low'].toDouble(), e.value['high'].toDouble(), e.value['time'].toInt())).toList();
   }
 
+  void _changeTimeFrame(String s) {
+    setState(() {
+      _candles = [];
+    });
+    _initCandles(s).then((value) {
+      setState(() {
+        _timeFrame = s;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -111,113 +123,141 @@ class _CurrencyChartState extends State<CurrencyChart> {
           height: 200,
           child: _candles.isEmpty
               ? const Center(child: CircularProgressIndicator())
-              : Padding(
-                  padding: const EdgeInsets.only(left: 0, right: 90),
-                  child: LineChart(
-                    LineChartData(
-                      backgroundColor: widget._backgroundColor,
-                      borderData: FlBorderData(show: false),
-                      titlesData: FlTitlesData(
-                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false, reservedSize: 0)),
-                        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 30,
-                            interval: (_maxX - _minX) / 7,
-                            getTitlesWidget: (value, meta) {
-                              Widget child = const Text('');
-                              switch (_timeFrame) {
-                                case AppStaticData.year:
-                                  child = _yearlyBottomTitles(_candles, value, meta);
-                                  break;
-                                case AppStaticData.month:
-                                  child = _monthlyBottomTitles(_candles, value, meta);
-                                  break;
-                                case AppStaticData.day:
-                                  child = _dailyBottomTitles(_candles, value, meta);
-                                  break;
-                                default:
-                              }
-                              return SideTitleWidget(
-                                axisSide: meta.axisSide,
-                                child: (value != 0) ? child : const Text(""),
-                              );
-                            },
+              : LineChart(
+                  LineChartData(
+                    backgroundColor: widget._backgroundColor,
+                    borderData: FlBorderData(show: false),
+                    titlesData: FlTitlesData(
+                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false, reservedSize: 0)),
+                      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 60,
+                          getTitlesWidget: (value, meta) => SideTitleWidget(
+                            axisSide: meta.axisSide,
+                            child: (value > _minY + ((_maxY - _minY) * 0.05) && value < _maxY - ((_maxY - _minY) * 0.05)) ? Text(value > 1000 ? '${(value / 1000.0).toStringAsFixed(1)}K' : value.toStringAsFixed(1)) : const Text(""),
                           ),
                         ),
                       ),
-                      lineBarsData: [
-                        LineChartBarData(
-                          curveSmoothness: 0.7,
-                          color: widget._lineColor,
-                          barWidth: 1.5,
-                          belowBarData: BarAreaData(
-                            show: true,
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                widget._gradientColor.withOpacity(0.3),
-                                widget._gradientColor.withOpacity(0),
-                              ],
-                            ),
-                          ),
-                          spots: _candles.asMap().entries.map<FlSpot>((e) => FlSpot(e.key.toDouble(), e.value.close)).toList(),
-                          dotData: const FlDotData(show: false),
-                          isCurved: true,
-                        ),
-                      ],
-                      lineTouchData: LineTouchData(
-                        touchSpotThreshold: 30,
-                        touchTooltipData: LineTouchTooltipData(
-                          tooltipPadding: const EdgeInsets.only(left: 15, top: 0, bottom: 0, right: 0),
-                          tooltipMargin: 0,
-                          tooltipHorizontalAlignment: FLHorizontalAlignment.right,
-                          getTooltipColor: (touchedSpot) => widget._tooltipColor,
-                          maxContentWidth: 250,
-                          getTooltipItems: (touchedSpots) => touchedSpots
-                              .asMap()
-                              .entries
-                              .map<LineTooltipItem>(
-                                (e) => LineTooltipItem(
-                                  "\$${e.value.y}",
-                                  widget._lineTooltipItemTextStyle,
-                                ),
-                              )
-                              .toList(),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 30,
+                          interval: _timeFrame != AppStaticData.year ? (_maxX - _minX) / 7 : (_maxX - _minX) / 4,
+                          getTitlesWidget: (value, meta) {
+                            Widget child = const Text('');
+                            switch (_timeFrame) {
+                              case AppStaticData.year:
+                                child = _yearlyBottomTitles(_candles, value, meta);
+                                break;
+                              case AppStaticData.month:
+                                child = _monthlyBottomTitles(_candles, value, meta);
+                                break;
+                              case AppStaticData.day:
+                                child = _dailyBottomTitles(_candles, value, meta);
+                                break;
+                              default:
+                            }
+                            return SideTitleWidget(
+                              axisSide: meta.axisSide,
+                              child: (value != 0) ? child : const Text(""),
+                            );
+                          },
                         ),
                       ),
-                      gridData: const FlGridData(show: false),
-                      minX: _minX,
-                      maxX: _maxX,
-                      minY: _minY,
-                      maxY: _maxY,
                     ),
+                    lineBarsData: [
+                      LineChartBarData(
+                        curveSmoothness: 0.7,
+                        color: widget._lineColor,
+                        barWidth: 1.5,
+                        belowBarData: BarAreaData(
+                          show: true,
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              customTheme.themeMode == ThemeMode.light ? widget._gradientColor.withOpacity(0.6) : widget._gradientColor.withOpacity(0.3),
+                              widget._gradientColor.withOpacity(0),
+                            ],
+                          ),
+                        ),
+                        spots: _candles.asMap().entries.map<FlSpot>((e) => FlSpot(e.key.toDouble(), e.value.close)).toList(),
+                        dotData: const FlDotData(show: false),
+                        isCurved: true,
+                      ),
+                    ],
+                    lineTouchData: LineTouchData(
+                      touchSpotThreshold: 30,
+                      touchTooltipData: LineTouchTooltipData(
+                        tooltipPadding: const EdgeInsets.only(left: 15, top: 0, bottom: 0, right: 0),
+                        tooltipMargin: 0,
+                        tooltipHorizontalAlignment: FLHorizontalAlignment.right,
+                        getTooltipColor: (touchedSpot) => widget._tooltipColor,
+                        maxContentWidth: 250,
+                        getTooltipItems: (touchedSpots) => touchedSpots
+                            .asMap()
+                            .entries
+                            .map<LineTooltipItem>(
+                              (e) => LineTooltipItem(
+                                "\$${e.value.y}",
+                                widget._lineTooltipItemTextStyle,
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                    gridData: const FlGridData(show: false),
+                    minX: _minX,
+                    maxX: _maxX,
+                    minY: _minY,
+                    maxY: _maxY,
                   ),
                 ),
         ),
         const SizedBox(
-          height: 45,
+          height: 20,
         ),
-        SegmentedButton(
-          segments: const [
-            ButtonSegment(enabled: true, value: AppStaticData.day, label: Text('Daily')),
-            ButtonSegment(enabled: true, value: AppStaticData.month, label: Text('Monthly')),
-            ButtonSegment(enabled: true, value: AppStaticData.year, label: Text('Yearly')),
-          ],
-          selected: <String>{_timeFrame},
-          onSelectionChanged: (s) {
-            setState(() {
-              _candles = [];
-            });
-            _initCandles(s.first).then((value) {
-              setState(() {
-                _timeFrame = s.first;
-              });
-            });
-          },
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) => constraints.maxWidth > 320
+              ? SegmentedButton(
+                  segments: const [
+                    ButtonSegment(enabled: true, value: AppStaticData.day, label: Text('Daily')),
+                    ButtonSegment(enabled: true, value: AppStaticData.month, label: Text('Monthly')),
+                    ButtonSegment(enabled: true, value: AppStaticData.year, label: Text('Yearly')),
+                  ],
+                  selected: <String>{_timeFrame},
+                  onSelectionChanged: (s) => _changeTimeFrame(s.first),
+                )
+              : Center(
+                  child: Wrap(
+                    direction: Axis.horizontal,
+                    children: [
+                      const SizedBox(
+                        width: 2,
+                      ),
+                      FilledButton(
+                        onPressed: () => _changeTimeFrame(AppStaticData.day),
+                        child: const Text("Daily"),
+                      ),
+                      const SizedBox(
+                        width: 2,
+                      ),
+                      FilledButton(
+                        onPressed: () => _changeTimeFrame(AppStaticData.month),
+                        child: const Text("Monthly"),
+                      ),
+                      const SizedBox(
+                        width: 2,
+                      ),
+                      FilledButton(
+                        onPressed: () => _changeTimeFrame(AppStaticData.year),
+                        child: const Text("Yearly"),
+                      ),
+                    ],
+                  ),
+                ),
         ),
       ],
     );

@@ -16,7 +16,7 @@ class RunnerOptions extends StatefulWidget {
 
 class _RunnerOptionsState extends State<RunnerOptions> {
   String? _timeFrame = AppStaticData.timeFrames.keys.first;
-  var _historicalCandlesCount = TextEditingController();
+  final _historicalCandlesCount = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
@@ -32,6 +32,7 @@ class _RunnerOptionsState extends State<RunnerOptions> {
     });
   }
 
+  @override
   void initState() {
     SettingsPage.getOptions().then((options) {
       if (options == null) return;
@@ -69,16 +70,17 @@ class _RunnerOptionsState extends State<RunnerOptions> {
 
       var data = {"TimeFrame": AppStaticData.timeFrames[_timeFrame], "HistoricalCandlesCount": int.parse(_historicalCandlesCount.text)};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'runner-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}runner-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
-      Map<String, dynamic>? responseObject = null;
+      Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
 
       if (res.statusCode == 200) {
         snackBarMessage = 'Successful';
         if (res.body != '') _setFields(responseObject);
-      } else
+      } else {
         snackBarMessage = responseObject?['Message'] ?? 'Error';
+      }
     } finally {
       setState(() {
         App.showSnackBar(
@@ -94,7 +96,7 @@ class _RunnerOptionsState extends State<RunnerOptions> {
 
   @override
   Widget build(BuildContext context) {
-    var space = SizedBox(
+    var space = const SizedBox(
       width: 10,
       height: 35,
     );
@@ -107,7 +109,7 @@ class _RunnerOptionsState extends State<RunnerOptions> {
             controller: _historicalCandlesCount,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Number of stored historical Candles",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -118,7 +120,7 @@ class _RunnerOptionsState extends State<RunnerOptions> {
             ),
           ),
           space,
-          Text('Time Frame'),
+          const Text('Time Frame'),
           DropdownButton(
             isExpanded: true,
             value: _timeFrame,
@@ -137,19 +139,19 @@ class _RunnerOptionsState extends State<RunnerOptions> {
             onChanged: (a) => setState(() => _timeFrame = a),
           ),
           space,
-          SizedBox(
+          const SizedBox(
             height: 70,
             width: 10,
           ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
-                  ? SizedBox(
+                  ? const SizedBox(
                       height: 25,
                       width: 25,
                       child: CircularProgressIndicator(),
                     )
-                  : Text('Update')),
+                  : const Text('Update')),
         ],
       ),
     );
