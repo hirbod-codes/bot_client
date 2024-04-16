@@ -66,61 +66,59 @@ class SecurityOptionsState extends State<SecurityOptions> {
       height: 35,
     );
 
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ListView(
-          children: [
-            TextField(
-              controller: _domain,
-              keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                labelText: "Domain",
-                hintText: "example.com or an IP address",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ListView(
+        children: [
+          TextField(
+            controller: _domain,
+            keyboardType: TextInputType.url,
+            decoration: const InputDecoration(
+              labelText: "Domain",
+              hintText: "example.com or an IP address",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
                 ),
               ),
             ),
-            space,
-            TextField(
-              controller: _port,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Port",
-                hintText: "443",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
+          ),
+          space,
+          TextField(
+            controller: _port,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: "Port",
+              hintText: "443",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
                 ),
               ),
             ),
-            space,
-            TextField(
-              controller: _apiKey,
-              decoration: const InputDecoration(
-                labelText: "Api Authentication Key",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
+          ),
+          space,
+          TextField(
+            controller: _apiKey,
+            decoration: const InputDecoration(
+              labelText: "Api Authentication Key",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
                 ),
               ),
             ),
-            space,
-            const SizedBox(
-              height: 70,
-              width: 10,
-            ),
-            ElevatedButton(onPressed: _submit, child: const Text('Update')),
-          ],
-        ),
+          ),
+          space,
+          const SizedBox(
+            height: 70,
+            width: 10,
+          ),
+          ElevatedButton(onPressed: _submit, child: const Text('Update')),
+        ],
       ),
     );
   }
