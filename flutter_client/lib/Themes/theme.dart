@@ -5,7 +5,7 @@ import 'package:flutter_client/Themes/light_theme.dart';
 CustomTheme customTheme = CustomTheme();
 
 class CustomTheme with ChangeNotifier {
-  static bool _isDark = false;
+  static bool _isDark = ThemeMode.system == ThemeMode.dark;
   ThemeMode get themeMode => _isDark ? ThemeMode.dark : ThemeMode.light;
 
   void toggleTheme() {

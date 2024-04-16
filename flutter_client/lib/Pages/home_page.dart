@@ -150,51 +150,48 @@ class _HomePageState extends State<HomePage> {
   Icon _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? const Icon(Icons.light_mode_outlined) : const Icon(Icons.dark_mode_outlined);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Home"),
-        actions: [
-          SizedBox(
-            height: 70,
-            width: 70,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 500),
-              child: Switch(
-                inactiveTrackColor: Theme.of(context).colorScheme.secondaryContainer,
-                key: ValueKey<Icon>(_themeSwitchIcon),
-                thumbIcon: MaterialStateProperty.all(_themeSwitchIcon),
-                value: customTheme.themeMode == ThemeMode.light,
-                onChanged: (bool value) {
-                  customTheme.toggleTheme();
-                  setState(() {
-                    _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? _lightIcon : _darkIcon;
-                  });
-                },
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text("Home"),
+          actions: [
+            SizedBox(
+              height: 70,
+              width: 70,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                child: Switch(
+                  inactiveTrackColor: Theme.of(context).colorScheme.secondaryContainer,
+                  key: ValueKey<Icon>(_themeSwitchIcon),
+                  thumbIcon: MaterialStateProperty.all(_themeSwitchIcon),
+                  value: customTheme.themeMode == ThemeMode.light,
+                  onChanged: (bool value) {
+                    customTheme.toggleTheme();
+                    setState(() {
+                      _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? _lightIcon : _darkIcon;
+                    });
+                  },
+                ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 35,
-            width: 35,
-            child: FloatingActionButton(
-              onPressed: () {},
-              child: const Icon(Icons.refresh_outlined),
+            SizedBox(
+              height: 35,
+              width: 35,
+              child: FloatingActionButton(
+                onPressed: _getStatus,
+                child: const Icon(Icons.refresh_outlined),
+              ),
             ),
-          ),
-        ],
-      ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        child: ListView(
+          ],
+        ),
+        body: ListView(
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, left: 8.0),
-                  child: Text('Status', style: Theme.of(context).textTheme.copyWith(bodyMedium: const TextStyle(color: Colors.grey)).bodyMedium),
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0, left: 8.0),
+                  child: Text('Status'),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
@@ -284,6 +281,18 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(
                   height: 90,
                 ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0, left: 8.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.currency_bitcoin_outlined),
+                      Text('BTC-USDT, BINGX'),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
                 CurrencyChart(
                   fSymbol: 'BTC',
                   tSymbol: 'USDT',
@@ -296,7 +305,5 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-      ),
-    );
-  }
+      );
 }
