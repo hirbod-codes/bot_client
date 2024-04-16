@@ -15,13 +15,13 @@ class RiskManagementOptions extends StatefulWidget {
 }
 
 class _RiskManagementOptionsState extends State<RiskManagementOptions> {
-  var _margin = TextEditingController();
-  var _leverage = TextEditingController();
-  var _sLPercentages = TextEditingController();
-  var _riskRewardRatio = TextEditingController();
-  var _brokerCommission = TextEditingController();
-  var _brokerMaximumLeverage = TextEditingController();
-  var _commissionPercentage = TextEditingController();
+  final _margin = TextEditingController();
+  final _leverage = TextEditingController();
+  final _sLPercentages = TextEditingController();
+  final _riskRewardRatio = TextEditingController();
+  final _brokerCommission = TextEditingController();
+  final _brokerMaximumLeverage = TextEditingController();
+  final _commissionPercentage = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
@@ -37,6 +37,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
     });
   }
 
+  @override
   void initState() {
     SettingsPage.getOptions().then((options) {
       if (options == null) return;
@@ -74,16 +75,17 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
 
       var data = {"Margin": double.parse(_margin.text), "Leverage": double.parse(_leverage.text), "SLPercentages": double.parse(_sLPercentages.text), "RiskRewardRatio": double.parse(_riskRewardRatio.text), "BrokerCommission": double.parse(_brokerCommission.text), "BrokerMaximumLeverage": double.parse(_brokerMaximumLeverage.text), "CommissionPercentage": double.parse(_commissionPercentage.text)};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'risk-management-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}risk-management-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
-      Map<String, dynamic>? responseObject = null;
+      Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
 
       if (res.statusCode == 200) {
         snackBarMessage = 'Successful';
         if (res.body != '') _setFields(responseObject);
-      } else
+      } else {
         snackBarMessage = responseObject?['Message'] ?? 'Error';
+      }
     } finally {
       setState(() {
         App.showSnackBar(
@@ -99,7 +101,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
 
   @override
   Widget build(BuildContext context) {
-    var space = SizedBox(
+    var space = const SizedBox(
       width: 10,
       height: 35,
     );
@@ -112,7 +114,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
             controller: _margin,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Margin",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -127,7 +129,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
             controller: _leverage,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Leverage",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -142,7 +144,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
             controller: _sLPercentages,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "SLPercentages",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -157,7 +159,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
             controller: _riskRewardRatio,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "RiskRewardRatio",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -172,7 +174,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
             controller: _brokerCommission,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "BrokerCommission",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -187,7 +189,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
             controller: _brokerMaximumLeverage,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "BrokerMaximumLeverage",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -202,7 +204,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
             controller: _commissionPercentage,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "CommissionPercentage",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -213,19 +215,19 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
             ),
           ),
           space,
-          SizedBox(
+          const SizedBox(
             height: 70,
             width: 10,
           ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
-                  ? SizedBox(
+                  ? const SizedBox(
                       height: 25,
                       width: 25,
                       child: CircularProgressIndicator(),
                     )
-                  : Text('Update')),
+                  : const Text('Update')),
         ],
       ),
     );

@@ -17,11 +17,11 @@ class BrokerOptions extends StatefulWidget {
 class _BrokerOptionsState extends State<BrokerOptions> {
   String? _timeFrame = AppStaticData.timeFrames.keys.first;
 
-  var _symbol = TextEditingController();
-  var _brokerCommission = TextEditingController();
-  var _baseUrl = TextEditingController();
-  var _apiKey = TextEditingController();
-  var _apiSecret = TextEditingController();
+  final _symbol = TextEditingController();
+  final _brokerCommission = TextEditingController();
+  final _baseUrl = TextEditingController();
+  final _apiKey = TextEditingController();
+  final _apiSecret = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
@@ -44,6 +44,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
 
   bool _isSubmitting = false;
 
+  @override
   void initState() {
     try {
       SettingsPage.getOptions().then((options) {
@@ -81,24 +82,26 @@ class _BrokerOptionsState extends State<BrokerOptions> {
 
       var data = {"TimeFrame": AppStaticData.timeFrames[_timeFrame], "Symbol": _symbol.text, "BrokerCommission": double.parse(_brokerCommission.text), "BaseUrl": _baseUrl.text, "ApiKey": _apiKey.text, "ApiSecret": _apiSecret.text};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
-      Map<String, dynamic>? responseObject = null;
+      Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
 
       if (res.statusCode == 200) {
         snackBarMessage = 'Successful';
         if (res.body != '') _setFields(responseObject);
-      } else
+      } else {
         snackBarMessage = responseObject?['Message'] ?? 'Error';
+      }
     } finally {
       setState(() {
-        if (snackBarMessage != '')
+        if (snackBarMessage != '') {
           App.showSnackBar(
             snackBarMessage,
             'Close',
             () {},
           );
+        }
 
         _isSubmitting = false;
       });
@@ -107,7 +110,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
 
   @override
   Widget build(BuildContext context) {
-    var space = SizedBox(
+    var space = const SizedBox(
       width: 10,
       height: 35,
     );
@@ -119,7 +122,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
           TextField(
             controller: _symbol,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Symbol",
               hintText: "BTC-USDT",
               border: OutlineInputBorder(
@@ -135,7 +138,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
             controller: _brokerCommission,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Commission",
               hintText: "0.001",
               border: OutlineInputBorder(
@@ -151,7 +154,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
             controller: _baseUrl,
             enabled: !_isSubmitting,
             keyboardType: TextInputType.url,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Base Url",
               hintText: "open-api-vst.bingx.com",
               border: OutlineInputBorder(
@@ -167,7 +170,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
             controller: _apiKey,
             enabled: !_isSubmitting,
             keyboardType: TextInputType.url,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "API Key",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -181,7 +184,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
           TextField(
             controller: _apiSecret,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "API Secret",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -192,7 +195,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
             ),
           ),
           space,
-          Text('Time Frame'),
+          const Text('Time Frame'),
           DropdownButton(
             isExpanded: true,
             value: _timeFrame,
@@ -211,19 +214,19 @@ class _BrokerOptionsState extends State<BrokerOptions> {
                 .toList(),
             onChanged: (a) => setState(() => _timeFrame = a),
           ),
-          SizedBox(
+          const SizedBox(
             height: 70,
             width: 10,
           ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
-                  ? SizedBox(
+                  ? const SizedBox(
                       height: 25,
                       width: 25,
                       child: CircularProgressIndicator(),
                     )
-                  : Text('Update')),
+                  : const Text('Update')),
         ],
       ),
     );

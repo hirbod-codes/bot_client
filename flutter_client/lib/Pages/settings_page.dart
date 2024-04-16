@@ -11,6 +11,8 @@ import 'package:flutter_client/Pages/Options/security_options.dart';
 import 'package:flutter_client/Pages/Options/strategy_options.dart';
 import 'package:http/http.dart' as http;
 
+import '../Themes/theme.dart';
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -41,12 +43,35 @@ class _SettingsPageState extends State<SettingsPage> {
     SettingsPage.getOptions();
   }
 
+  final Icon _lightIcon = const Icon(Icons.light_mode_outlined);
+  final Icon _darkIcon = const Icon(Icons.dark_mode_outlined);
+  Icon _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? const Icon(Icons.light_mode_outlined) : const Icon(Icons.dark_mode_outlined);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(_title),
         actions: [
+          SizedBox(
+            height: 70,
+            width: 70,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: Switch(
+                inactiveTrackColor: Theme.of(context).colorScheme.secondaryContainer,
+                key: ValueKey<Icon>(_themeSwitchIcon),
+                thumbIcon: MaterialStateProperty.all(_themeSwitchIcon),
+                value: customTheme.themeMode == ThemeMode.light,
+                onChanged: (bool value) {
+                  customTheme.toggleTheme();
+                  setState(() {
+                    _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? _lightIcon : _darkIcon;
+                  });
+                },
+              ),
+            ),
+          ),
           SizedBox(
             height: 35,
             width: 35,
@@ -69,7 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       ),
       drawer: Drawer(
-        child: Column(
+        child: ListView(
           children: [
             const DrawerHeader(
               child: Icon(

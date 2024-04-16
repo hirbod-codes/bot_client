@@ -145,6 +145,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  final Icon _lightIcon = const Icon(Icons.light_mode_outlined);
+  final Icon _darkIcon = const Icon(Icons.dark_mode_outlined);
+  Icon _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? const Icon(Icons.light_mode_outlined) : const Icon(Icons.dark_mode_outlined);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,10 +158,20 @@ class _HomePageState extends State<HomePage> {
           SizedBox(
             height: 70,
             width: 70,
-            child: Switch(
-              thumbIcon: MaterialStateProperty.all(const Icon(Icons.light_mode_outlined)),
-              value: customTheme.themeMode == ThemeMode.light,
-              onChanged: (bool value) => customTheme.toggleTheme(),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: Switch(
+                inactiveTrackColor: Theme.of(context).colorScheme.secondaryContainer,
+                key: ValueKey<Icon>(_themeSwitchIcon),
+                thumbIcon: MaterialStateProperty.all(_themeSwitchIcon),
+                value: customTheme.themeMode == ThemeMode.light,
+                onChanged: (bool value) {
+                  customTheme.toggleTheme();
+                  setState(() {
+                    _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? _lightIcon : _darkIcon;
+                  });
+                },
+              ),
             ),
           ),
           SizedBox(
@@ -170,65 +184,118 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0, left: 8.0),
-                child: Text('Status', style: Theme.of(context).textTheme.copyWith(bodyMedium: const TextStyle(color: Colors.grey)).bodyMedium),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: (_loading || _isSubmitting) ? const CircularProgressIndicator() : _status(context),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Center(
-                child: SegmentedButton(
-                  showSelectedIcon: false,
-                  emptySelectionAllowed: true,
-                  segments: const [
-                    ButtonSegment(enabled: true, value: 'start', label: Text('Start'), icon: Icon(Icons.play_arrow_outlined)),
-                    ButtonSegment(enabled: true, value: 'suspend', label: Text('Suspend'), icon: Icon(Icons.pause_outlined)),
-                    ButtonSegment(enabled: true, value: 'stop', label: Text('Stop'), icon: Icon(Icons.stop_outlined)),
-                  ],
-                  selected: <String>{_selectedStatus},
-                  onSelectionChanged: (s) {
-                    switch (s.first) {
-                      case 'start':
-                        _start();
-                        break;
-                      case 'suspend':
-                        _suspend();
-                        break;
-                      case 'stop':
-                        _stop();
-                        break;
-                      default:
-                    }
-                    setState(() {
-                      _selectedStatus = s.first;
-                    });
-                  },
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        child: ListView(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+                  child: Text('Status', style: Theme.of(context).textTheme.copyWith(bodyMedium: const TextStyle(color: Colors.grey)).bodyMedium),
                 ),
-              ),
-              const SizedBox(
-                height: 90,
-              ),
-              CurrencyChart(
-                fSymbol: 'BTC',
-                tSymbol: 'USDT',
-                lineColor: Colors.yellow.shade700,
-                gradientColor: Colors.yellow,
-                tooltipColor: Theme.of(context).colorScheme.secondary,
-                lineTooltipItemTextStyle: Theme.of(context).textTheme.bodySmall!,
-              ),
-            ],
-          ),
-        ],
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: (_loading || _isSubmitting) ? const CircularProgressIndicator() : _status(context),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) => constraints.maxWidth > 340
+                      ? Center(
+                          child: SegmentedButton(
+                            showSelectedIcon: false,
+                            emptySelectionAllowed: true,
+                            segments: const [
+                              ButtonSegment(enabled: true, value: 'start', label: Text('Start'), icon: Icon(Icons.play_arrow_outlined)),
+                              ButtonSegment(enabled: true, value: 'suspend', label: Text('Suspend'), icon: Icon(Icons.pause_outlined)),
+                              ButtonSegment(enabled: true, value: 'stop', label: Text('Stop'), icon: Icon(Icons.stop_outlined)),
+                            ],
+                            selected: <String>{_selectedStatus},
+                            onSelectionChanged: (s) {
+                              switch (s.first) {
+                                case 'start':
+                                  _start();
+                                  break;
+                                case 'suspend':
+                                  _suspend();
+                                  break;
+                                case 'stop':
+                                  _stop();
+                                  break;
+                                default:
+                              }
+                              setState(() {
+                                _selectedStatus = s.first;
+                              });
+                            },
+                          ),
+                        )
+                      : Center(
+                          child: Wrap(
+                            direction: Axis.horizontal,
+                            children: [
+                              const SizedBox(
+                                width: 2,
+                              ),
+                              FilledButton(
+                                onPressed: _start,
+                                child: const Wrap(
+                                  direction: Axis.horizontal,
+                                  children: [
+                                    Icon(Icons.play_arrow_outlined),
+                                    Text('Start'),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 2,
+                              ),
+                              FilledButton(
+                                onPressed: _suspend,
+                                child: const Wrap(
+                                  direction: Axis.horizontal,
+                                  children: [
+                                    Icon(Icons.pause_outlined),
+                                    Text('Suspend'),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 2,
+                              ),
+                              FilledButton(
+                                onPressed: _stop,
+                                child: const Wrap(
+                                  direction: Axis.horizontal,
+                                  children: [
+                                    Icon(Icons.stop_outlined),
+                                    Text('Stop'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                ),
+                const SizedBox(
+                  height: 90,
+                ),
+                CurrencyChart(
+                  fSymbol: 'BTC',
+                  tSymbol: 'USDT',
+                  lineColor: Colors.yellow.shade700,
+                  gradientColor: Colors.yellow,
+                  tooltipColor: Theme.of(context).colorScheme.secondaryContainer,
+                  lineTooltipItemTextStyle: Theme.of(context).textTheme.bodySmall!,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
