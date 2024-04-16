@@ -16,9 +16,9 @@ class BotOptions extends StatefulWidget {
 
 class _BotOptionsState extends State<BotOptions> {
   String? _timeFrame = AppStaticData.timeFrames.keys.first;
-  var _provider = TextEditingController();
+  final _provider = TextEditingController();
   bool _shouldSkipOnParallelPositionRequest = false;
-  var _retryCount = TextEditingController();
+  final _retryCount = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
@@ -36,6 +36,7 @@ class _BotOptionsState extends State<BotOptions> {
     });
   }
 
+  @override
   void initState() {
     SettingsPage.getOptions().then((options) {
       if (options == null) return;
@@ -73,16 +74,17 @@ class _BotOptionsState extends State<BotOptions> {
 
       var data = {"TimeFrame": AppStaticData.timeFrames[_timeFrame], "Provider": _provider.text, "ShouldSkipOnParallelPositionRequest": _shouldSkipOnParallelPositionRequest, "RetryCount": int.parse(_retryCount.text)};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'bot-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}bot-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
-      Map<String, dynamic>? responseObject = null;
+      Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
 
       if (res.statusCode == 200) {
         snackBarMessage = 'Successful';
         if (res.body != '') _setFields(responseObject);
-      } else
+      } else {
         snackBarMessage = responseObject?['Message'] ?? 'Error';
+      }
     } finally {
       setState(() {
         App.showSnackBar(
@@ -98,7 +100,7 @@ class _BotOptionsState extends State<BotOptions> {
 
   @override
   Widget build(BuildContext context) {
-    var space = SizedBox(
+    var space = const SizedBox(
       width: 10,
       height: 35,
     );
@@ -110,7 +112,7 @@ class _BotOptionsState extends State<BotOptions> {
           TextField(
             controller: _provider,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Provider Identifier",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -123,9 +125,10 @@ class _BotOptionsState extends State<BotOptions> {
           space,
           Flexible(
             child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
               direction: Axis.horizontal,
               children: [
-                Text('Should Skip On Parallel Position Request'),
+                const Text('Should Skip On Parallel Position Request'),
                 Switch(
                   value: _shouldSkipOnParallelPositionRequest,
                   onChanged: (bool value) => setState(() => _shouldSkipOnParallelPositionRequest = value),
@@ -134,7 +137,7 @@ class _BotOptionsState extends State<BotOptions> {
             ),
           ),
           space,
-          Text('Time Frame'),
+          const Text('Time Frame'),
           DropdownButton(
             isExpanded: true,
             value: _timeFrame,
@@ -157,7 +160,7 @@ class _BotOptionsState extends State<BotOptions> {
             controller: _retryCount,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Number of attempts after failure",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -168,19 +171,19 @@ class _BotOptionsState extends State<BotOptions> {
             ),
           ),
           space,
-          SizedBox(
+          const SizedBox(
             height: 70,
             width: 10,
           ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
-                  ? SizedBox(
+                  ? const SizedBox(
                       height: 25,
                       width: 25,
                       child: CircularProgressIndicator(),
                     )
-                  : Text('Update')),
+                  : const Text('Update')),
         ],
       ),
     );

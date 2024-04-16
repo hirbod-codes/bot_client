@@ -15,10 +15,10 @@ class IndicatorOptions extends StatefulWidget {
 }
 
 class _IndicatorOptionsState extends State<IndicatorOptions> {
-  var _atrPeriod = TextEditingController();
-  var _atrMultiplier = TextEditingController();
-  var _superTrendPeriod = TextEditingController();
-  var _superTrendMultiplier = TextEditingController();
+  final _atrPeriod = TextEditingController();
+  final _atrMultiplier = TextEditingController();
+  final _superTrendPeriod = TextEditingController();
+  final _superTrendMultiplier = TextEditingController();
   String? _superTrendCandlePart = AppStaticData.candleParts.keys.first;
 
   void _setFields(Map<String, dynamic>? options) {
@@ -39,6 +39,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
     });
   }
 
+  @override
   void initState() {
     SettingsPage.getOptions().then((options) {
       if (options == null) return;
@@ -80,16 +81,17 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
         "SuperTrendOptions": {"Period": int.parse(_superTrendPeriod.text), "Multiplier": double.parse(_superTrendMultiplier.text), "CandlePart": AppStaticData.candleParts[_superTrendCandlePart], "ChangeATRCalculationMethod": true}
       };
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'indicator-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}indicator-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
-      Map<String, dynamic>? responseObject = null;
+      Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
 
       if (res.statusCode == 200) {
         snackBarMessage = 'Successful';
         if (res.body != '') _setFields(responseObject);
-      } else
+      } else {
         snackBarMessage = responseObject?['Message'] ?? 'Error';
+      }
     } finally {
       setState(() {
         App.showSnackBar(
@@ -105,7 +107,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
 
   @override
   Widget build(BuildContext context) {
-    var space = SizedBox(
+    var space = const SizedBox(
       width: 10,
       height: 35,
     );
@@ -114,15 +116,15 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
       padding: const EdgeInsets.all(8.0),
       child: ListView(
         children: [
-          Center(
+          const Center(
             child: Text('ATR'),
           ),
-          Divider(),
+          const Divider(),
           TextField(
             controller: _atrPeriod,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "ATR Period",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -137,7 +139,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
             controller: _atrMultiplier,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "ATR Multiplier",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -149,15 +151,15 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
           ),
           space,
           space,
-          Center(
+          const Center(
             child: Text('Super Trend'),
           ),
-          Divider(),
+          const Divider(),
           TextField(
             controller: _superTrendPeriod,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Super Trend Period",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -172,7 +174,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
             controller: _superTrendMultiplier,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Super Trend Multiplier",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -183,7 +185,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
             ),
           ),
           space,
-          Text('Source'),
+          const Text('Source'),
           DropdownButton(
             isExpanded: true,
             value: _superTrendCandlePart,
@@ -202,19 +204,19 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
             onChanged: (a) => setState(() => _superTrendCandlePart = a),
           ),
           space,
-          SizedBox(
+          const SizedBox(
             height: 70,
             width: 10,
           ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
-                  ? SizedBox(
+                  ? const SizedBox(
                       height: 25,
                       width: 25,
                       child: CircularProgressIndicator(),
                     )
-                  : Text('Update')),
+                  : const Text('Update')),
         ],
       ),
     );

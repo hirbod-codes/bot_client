@@ -15,7 +15,7 @@ class StrategyOptions extends StatefulWidget {
 }
 
 class _StrategyOptionsState extends State<StrategyOptions> {
-  var _providerName = TextEditingController();
+  final _providerName = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null) return;
@@ -25,6 +25,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
     });
   }
 
+  @override
   void initState() {
     SettingsPage.getOptions().then((options) {
       if (options == null) return;
@@ -62,16 +63,17 @@ class _StrategyOptionsState extends State<StrategyOptions> {
 
       var data = {"ProviderName": _providerName.text};
 
-      http.Response res = await http.patch(Uri.parse(backendUrl + 'strategy-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}strategy-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
-      Map<String, dynamic>? responseObject = null;
+      Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
 
       if (res.statusCode == 200) {
         snackBarMessage = 'Successful';
         if (res.body != '') _setFields(responseObject);
-      } else
+      } else {
         snackBarMessage = responseObject?['Message'] ?? 'Error';
+      }
     } finally {
       setState(() {
         App.showSnackBar(
@@ -87,7 +89,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
 
   @override
   Widget build(BuildContext context) {
-    var space = SizedBox(
+    var space = const SizedBox(
       width: 10,
       height: 35,
     );
@@ -100,7 +102,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
             controller: _providerName,
             keyboardType: TextInputType.number,
             enabled: !_isSubmitting,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: "Provider Identifier",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.only(
@@ -111,19 +113,19 @@ class _StrategyOptionsState extends State<StrategyOptions> {
             ),
           ),
           space,
-          SizedBox(
+          const SizedBox(
             height: 70,
             width: 10,
           ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
-                  ? SizedBox(
+                  ? const SizedBox(
                       height: 25,
                       width: 25,
                       child: CircularProgressIndicator(),
                     )
-                  : Text('Update')),
+                  : const Text('Update')),
         ],
       ),
     );
