@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_client/Pages/home_page.dart';
+import 'package:flutter_client/Pages/order_history.dart';
 import 'package:flutter_client/Pages/settings_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -12,6 +13,8 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final Widget _home = const HomePage();
   final Widget _settings = const SettingsPage();
+  final Widget _orderHistory = const OrderHistory();
+  final Widget _wallet = const Text('_wallet');
 
   Widget? _content;
 
@@ -46,6 +49,16 @@ class _MainPageState extends State<MainPage> {
               label: 'Settings',
               tooltip: 'Settings',
             ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_balance_wallet),
+              label: 'Wallet',
+              tooltip: 'Wallet',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history),
+              label: 'Order history',
+              tooltip: 'Order history',
+            ),
           ],
           onTap: (int index) {
             switch (index) {
@@ -58,6 +71,18 @@ class _MainPageState extends State<MainPage> {
               case 1:
                 setState(() {
                   _content = _settings;
+                  _index = index;
+                });
+                break;
+              case 2:
+                setState(() {
+                  _content = _wallet;
+                  _index = index;
+                });
+                break;
+              case 3:
+                setState(() {
+                  _content = _orderHistory;
                   _index = index;
                 });
                 break;
