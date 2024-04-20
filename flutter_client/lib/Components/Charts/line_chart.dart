@@ -169,7 +169,8 @@ class _CurrencyChartState extends State<CurrencyChart> {
                     ),
                     lineBarsData: [
                       LineChartBarData(
-                        curveSmoothness: 0.7,
+                        isCurved: true,
+                        curveSmoothness: 0.2,
                         color: widget._lineColor,
                         barWidth: 1.5,
                         belowBarData: BarAreaData(
@@ -185,7 +186,6 @@ class _CurrencyChartState extends State<CurrencyChart> {
                         ),
                         spots: _candles.asMap().entries.map<FlSpot>((e) => FlSpot(e.key.toDouble(), e.value.close)).toList(),
                         dotData: const FlDotData(show: false),
-                        isCurved: true,
                       ),
                     ],
                     lineTouchData: LineTouchData(
