@@ -21,7 +21,9 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "11"
-      - uses: subosito/flutter-action@master
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3"
 
       - run: flutter pub get
       - run: flutter build apk
@@ -41,10 +43,11 @@ jobs:
         working-directory: ./flutter_client
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@master
+      - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
           architecture: x64
+          flutter-version: "3"
 
       - run: flutter pub get
 
@@ -73,9 +76,10 @@ jobs:
         working-directory: ./flutter_client
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@master
+      - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: "3"
 
       - run: flutter pub get
       - run: flutter build web --base-href /web/
@@ -126,9 +130,10 @@ jobs:
         working-directory: ./flutter_client
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@master
+      - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: "3"
 
       - run: |
           sudo apt-get update -y
@@ -151,9 +156,10 @@ jobs:
         working-directory: ./flutter_client
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@master
+      - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: "3"
 
       - run: flutter pub get
       - run: flutter build windows
