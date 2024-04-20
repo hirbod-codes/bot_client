@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_client/Data/app_data.dart';
-import 'package:flutter_client/Pages/Charts/line_chart.dart';
 import 'package:flutter_client/Themes/theme.dart';
 import 'package:flutter_client/main.dart';
 import 'package:http/http.dart' as http;
@@ -198,7 +197,7 @@ class _HomePageState extends State<HomePage> {
                   child: (_loading || _isSubmitting) ? const CircularProgressIndicator() : _status(context),
                 ),
                 const SizedBox(
-                  height: 30,
+                  height: 40,
                 ),
                 LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) => constraints.maxWidth > 340
@@ -278,28 +277,9 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                 ),
+                const Divider(),
                 const SizedBox(
-                  height: 90,
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0, left: 8.0),
-                  child: Row(
-                    children: [
-                      Icon(Icons.currency_bitcoin_outlined),
-                      Text('BTC-USDT, BINGX'),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                CurrencyChart(
-                  fSymbol: 'BTC',
-                  tSymbol: 'USDT',
-                  lineColor: Colors.yellow.shade700,
-                  gradientColor: Colors.yellow,
-                  tooltipColor: Theme.of(context).colorScheme.secondaryContainer,
-                  lineTooltipItemTextStyle: Theme.of(context).textTheme.bodySmall!,
+                  height: 30,
                 ),
               ],
             ),
