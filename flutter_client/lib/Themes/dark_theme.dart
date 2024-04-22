@@ -28,6 +28,7 @@ ThemeData darkTheme = FlexThemeData.dark(
     navigationBarOpacity: 0,
     bottomNavigationBarOpacity: 0,
     bottomNavigationBarElevation: 0,
+    bottomNavigationBarType: BottomNavigationBarType.fixed,
   ),
   useMaterial3ErrorColors: true,
   visualDensity: FlexColorScheme.comfortablePlatformDensity,

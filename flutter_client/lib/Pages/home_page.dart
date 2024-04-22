@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: _fullName == null || !_fullName!.contains('-')
+          title: _fullName == null
               ? null
               : Row(
                   children: [
@@ -169,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${_fullName!.split('-')[0]} ${_fullName!.split('-')[1]}'),
+                          !_fullName!.contains('-') ? Text('${_fullName!.split('-')[0]} ${_fullName!.split('-')[1]}') : Text(_fullName!),
                           Text(
                             _brokerName!,
                             style: Theme.of(context).textTheme.bodySmall,
@@ -305,18 +305,6 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(
                   height: 90,
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0, left: 8.0),
-                  child: Row(
-                    children: [
-                      Icon(Icons.currency_bitcoin_outlined),
-                      Text('BTC-USDT, BINGX'),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 15,
                 ),
                 // const OpenPosition(),
               ],

@@ -5,7 +5,7 @@ ThemeData lightTheme = FlexThemeData.light(
   appBarOpacity: 0,
   appBarElevation: 0,
   colors: const FlexSchemeColor(
-    primary: Color(0xFF08740A),
+    primary: Color(0xFF81C784),
     primaryContainer: Color(0xff9ee29f),
     secondary: Color(0xff365b37),
     secondaryContainer: Color(0xFF8FBF92),
@@ -29,6 +29,7 @@ ThemeData lightTheme = FlexThemeData.light(
     navigationBarOpacity: 0,
     bottomNavigationBarOpacity: 0,
     bottomNavigationBarElevation: 0,
+    bottomNavigationBarType: BottomNavigationBarType.fixed,
   ),
   useMaterial3ErrorColors: true,
   visualDensity: FlexColorScheme.comfortablePlatformDensity,

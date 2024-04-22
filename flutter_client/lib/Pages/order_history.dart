@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_client/Components/scrollable_table.dart';
 import 'package:flutter_client/Data/app_data.dart';
 import 'package:flutter_client/Themes/theme.dart';
@@ -17,11 +18,9 @@ class OrderHistory extends StatefulWidget {
 }
 
 class _OrderHistoryState extends State<OrderHistory> {
-  List<dynamic>? _positions;
+  Map<String, List<dynamic>>? _positions;
 
   bool _refreshing = false;
-
-  String? _symbol;
 
   @override
   void initState() {
@@ -49,33 +48,35 @@ class _OrderHistoryState extends State<OrderHistory> {
         headers: {HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''},
       );
 
-      _positions = jsonDecode(response.body) as List<dynamic>;
-      if (_positions == null) {
+      var positions = jsonDecode(response.body) as List<dynamic>?;
+      if (positions == null) {
         snackBarMessage = 'Error';
         return;
       }
 
-      _positions = _positions!
-          .map((e) => {
-                "Symbol": e['symbol'],
-                "Profit with commission": e['profitWithCommission'],
-                "Commission": e['commission'],
-                "Position direction": e['positionDirection'],
-                "Opened price": e['openedPrice'],
-                "Closed price": e['closedPrice'],
-                "Sl price": e['slPrice'],
-                "Tp price": e['tpPrice'],
-                "Profit": e['profit'],
-                "Margin": e['margin'],
-                "Leverage": e['leverage'],
-                "Created at": e['createdAt'],
-                "Closed at": e['closedAt'],
-                "Commission ratio": e['commissionRatio'],
-                "Position status": e['positionStatus'],
-                "Opened at": e['openedAt'],
-                "Cancelled at": e['cancelledAt'],
-              })
-          .toList();
+      for (var position in positions) {
+        _positions ??= {};
+        _positions![position['symbol']] ??= [];
+
+        _positions![position['symbol']]!.add({
+          "Profit with commission": position['profitWithCommission'],
+          "Commission": position['commission'],
+          "Position direction": position['positionDirection'],
+          "Opened price": position['openedPrice'],
+          "Closed price": position['closedPrice'],
+          "Sl price": position['slPrice'],
+          "Tp price": position['tpPrice'],
+          "Profit": position['profit'],
+          "Margin": position['margin'],
+          "Leverage": position['leverage'],
+          "Created at": position['createdAt'],
+          "Closed at": position['closedAt'],
+          "Commission ratio": position['commissionRatio'],
+          "Position status": position['positionStatus'],
+          "Opened at": position['openedAt'],
+          "Cancelled at": position['cancelledAt'],
+        });
+      }
     } finally {
       setState(() {
         _refreshing = false;
@@ -96,7 +97,6 @@ class _OrderHistoryState extends State<OrderHistory> {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("Order History"),
           actions: [
             SizedBox(
               height: 70,
@@ -125,66 +125,78 @@ class _OrderHistoryState extends State<OrderHistory> {
             ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: _refreshing
-              ? const CircularProgressIndicator()
-              : (_positions == null || (_positions?.isEmpty ?? true)
-                  ? Center(
-                      child: Wrap(
-                        children: [
-                          const Icon(Icons.dangerous_outlined),
-                          const Text('System failed to fetch orders.'),
-                        ]
-                            .map(
-                              (e) => Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: e,
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    )
-                  : ListView(
+        body: _refreshing
+            ? const Center(child: CircularProgressIndicator())
+            : ((_positions == null || (_positions?.isEmpty ?? true))
+                ? Center(
+                    child: Wrap(
                       children: [
-                        Text(_symbol ?? 'Symbol'),
-                        SizedBox(
-                            height: double.maxFinite,
-                            child: ScrollableTable(
-                              buildCell: (BuildContext b, TableVicinity tv) => tv.row == 0
-                                  ? TableViewCell(
-                                      child: Center(
-                                        child: Wrap(
-                                          children: [
-                                            Text(_positions![0].keys.elementAt(tv.column)),
-                                          ],
-                                        ),
+                        const Icon(Icons.dangerous_outlined),
+                        const Text('System failed to fetch orders.'),
+                      ]
+                          .map(
+                            (e) => Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: e,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  )
+                : DefaultTabController(
+                    length: _positions!.length,
+                    child: Column(
+                      children: [
+                        TabBar(
+                          isScrollable: true,
+                          tabs: _positions!.keys.map((e) => Text(e)).toList(),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                            child: TabBarView(
+                              children: _positions!.entries
+                                  .map(
+                                    (p) => ScrollableTable(
+                                      buildCell: (BuildContext b, TableVicinity tv) => tv.row == 0
+                                          ? TableViewCell(
+                                              child: Center(
+                                                child: Wrap(
+                                                  children: [
+                                                    Text(p.value[0].keys.elementAt(tv.column)),
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                          : TableViewCell(
+                                              child: Center(
+                                                child: Wrap(
+                                                  children: [
+                                                    Text(p.value[tv.row - 1][p.value[0].keys.elementAt(tv.column)].toString()),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                      buildColumnSpan: (index) => const TableSpan(
+                                        foregroundDecoration: TableSpanDecoration(),
+                                        extent: FixedTableSpanExtent(150),
                                       ),
-                                    )
-                                  : TableViewCell(
-                                      child: Center(
-                                        child: Wrap(
-                                          children: [
-                                            Text(_positions![tv.row - 1][_positions![0].keys.elementAt(tv.column)].toString()),
-                                          ],
+                                      buildRowSpan: (int index) => TableSpan(
+                                        backgroundDecoration: TableSpanDecoration(
+                                          color: index.isEven ? Colors.black.withOpacity(0.2) : null,
                                         ),
+                                        extent: const FixedTableSpanExtent(50),
                                       ),
+                                      columnsCount: p.value[0].keys.length,
+                                      rowsCount: p.value.length + 1,
                                     ),
-                              buildColumnSpan: (index) => const TableSpan(
-                                foregroundDecoration: TableSpanDecoration(),
-                                extent: FixedTableSpanExtent(100),
-                              ),
-                              buildRowSpan: (int index) => TableSpan(
-                                backgroundDecoration: TableSpanDecoration(
-                                  color: index.isEven ? Colors.black.withOpacity(0.2) : null,
-                                ),
-                                extent: const FixedTableSpanExtent(50),
-                              ),
-                              columnsCount: _positions![0].keys.length,
-                              rowsCount: _positions!.length + 1,
-                            )),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        ),
                       ],
-                    )),
-        ),
+                    ),
+                  )),
       );
 }

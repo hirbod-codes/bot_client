@@ -21,6 +21,7 @@ class _BotOptionsState extends State<BotOptions> {
   final _retryCount = TextEditingController();
 
   bool _isLoading = true;
+  bool _isSubmitting = false;
 
   void _setFields(Map<String, dynamic>? options) {
     if (options == null || !options.keys.contains('botOptions')) return;
@@ -53,8 +54,6 @@ class _BotOptionsState extends State<BotOptions> {
     }
   }
 
-  bool _isSubmitting = false;
-
   void _submit() async {
     String snackBarMessage = 'Error';
 
@@ -72,9 +71,7 @@ class _BotOptionsState extends State<BotOptions> {
         return;
       }
 
-      setState(() {
-        _isSubmitting = true;
-      });
+      setState(() => _isSubmitting = true);
 
       var data = jsonDecode(await SettingsPage.getOptions() ?? '{}') as Map<String, dynamic>;
       data["botOptions"] = {

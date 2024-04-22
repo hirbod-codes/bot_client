@@ -18,7 +18,8 @@ class AppDataRepository {
 
     if (domain == null || port == null || authKey == null) return null;
 
-    return "${domain}:${port.toString()}/bot/";
+    return "$domain:${port.toString()}/";
+    // return "${domain}:${port.toString()}/bot/";
   }
 }
 
