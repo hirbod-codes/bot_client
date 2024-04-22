@@ -66,13 +66,7 @@ class SecurityOptionsState extends State<SecurityOptions> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    var space = const SizedBox(
-      width: 10,
-      height: 35,
-    );
-
-    return Padding(
+  Widget build(BuildContext context) => Padding(
       padding: const EdgeInsets.all(8.0),
       child: ListView(
         children: [
@@ -90,7 +84,10 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
           ),
-          space,
+          const SizedBox(
+            width: 10,
+            height: 35,
+          ),
           TextField(
             controller: _port,
             keyboardType: TextInputType.number,
@@ -105,7 +102,10 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
           ),
-          space,
+          const SizedBox(
+            width: 10,
+            height: 35,
+          ),
           TextField(
             controller: _apiKey,
             decoration: const InputDecoration(
@@ -132,5 +132,6 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             )
             .toList(),
-      );
+      ),
+    );
 }

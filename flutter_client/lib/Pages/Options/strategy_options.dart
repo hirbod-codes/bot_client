@@ -106,7 +106,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
       padding: const EdgeInsets.all(8.0),
       child: ListView(
         children: [
-          (_isLoading || _isSubmitting) ? const Center(child: LinearProgressIndicator()) : null,
+          (_isLoading || _isSubmitting) ? const Center(child: LinearProgressIndicator()) : const Text(''),
           TextField(
             controller: _providerName,
             keyboardType: TextInputType.number,

@@ -28,26 +28,10 @@ class _MainPageState extends State<MainPage> {
           type: BottomNavigationBarType.fixed,
           currentIndex: _index,
           items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              label: 'Home',
-              tooltip: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              label: 'Settings',
-              tooltip: 'Settings',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet),
-              label: 'Wallet',
-              tooltip: 'Wallet',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.history),
-              label: 'Order history',
-              tooltip: 'Order history',
-            ),
+            BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home', tooltip: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), label: 'Settings', tooltip: 'Settings'),
+            BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Wallet', tooltip: 'Wallet'),
+            BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Order history', tooltip: 'Order history'),
           ],
           onTap: (int index) {
             switch (index) {

@@ -112,15 +112,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    var space = const SizedBox(
-      width: 10,
-      height: 35,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView(
+  Widget build(BuildContext context) => ListView(
         children: [
           (_isLoading || _isSubmitting) ? const Center(child: LinearProgressIndicator()) : null,
           const Center(
@@ -141,7 +133,6 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _atrMultiplier,
             keyboardType: TextInputType.number,
@@ -156,8 +147,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
               ),
             ),
           ),
-          space,
-          space,
+          const SizedBox(height: 20),
           const Center(
             child: Text('Super Trend'),
           ),
@@ -176,7 +166,6 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
               ),
             ),
           ),
-          space,
           TextField(
             controller: _superTrendMultiplier,
             keyboardType: TextInputType.number,
@@ -191,7 +180,6 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
               ),
             ),
           ),
-          space,
           const Text('Source'),
           DropdownButton(
             isExpanded: true,
@@ -210,11 +198,6 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
                 .toList(),
             onChanged: (a) => setState(() => _superTrendCandlePart = a),
           ),
-          space,
-          const SizedBox(
-            height: 70,
-            width: 10,
-          ),
           ElevatedButton(
               onPressed: _submit,
               child: _isSubmitting
@@ -224,8 +207,13 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
                       child: CircularProgressIndicator(),
                     )
                   : const Text('Update')),
-        ],
-      ),
-    );
-  }
+        ]
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                child: e,
+              ),
+            )
+            .toList(),
+      );
 }
