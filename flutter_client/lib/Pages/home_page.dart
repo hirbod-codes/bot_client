@@ -24,6 +24,9 @@ class _HomePageState extends State<HomePage> {
 
   String _selectedStatus = "";
 
+  String? _fullName;
+  String? _brokerName;
+
   void _start() => _submit('start');
 
   void _suspend() => _submit('suspend');
@@ -42,7 +45,7 @@ class _HomePageState extends State<HomePage> {
 
       await Future.delayed(const Duration(seconds: 1));
 
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null) {
         snackBarMessage = 'No URL provided!';
         return;
@@ -97,12 +100,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _getStatus();
-  }
-
   void _submit(String action) async {
     if (_isSubmitting) return;
 
@@ -113,7 +110,7 @@ class _HomePageState extends State<HomePage> {
         _isSubmitting = true;
       });
 
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null || !['start', 'suspend', 'stop'].contains(action)) {
         snackBarMessage = 'No URL provided.';
         return;
@@ -145,6 +142,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    AppStaticData.getSharedPreferences().then((v) {
+      _fullName = v.getString(AppDataKeys.fullName);
+      _brokerName = v.getString(AppDataKeys.brokerName);
+    }).whenComplete(() => setState(() {}));
+    _getStatus();
+  }
+
   final Icon _lightIcon = const Icon(Icons.light_mode_outlined);
   final Icon _darkIcon = const Icon(Icons.dark_mode_outlined);
   Icon _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? const Icon(Icons.light_mode_outlined) : const Icon(Icons.dark_mode_outlined);
@@ -153,7 +160,26 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("Home"),
+          title: _fullName == null || !_fullName!.contains('-')
+              ? null
+              : Row(
+                  children: [
+                    const CircleAvatar(child: Icon(Icons.account_circle_outlined)),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${_fullName!.split('-')[0]} ${_fullName!.split('-')[1]}'),
+                          Text(
+                            _brokerName!,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
           actions: [
             SizedBox(
               height: 70,
@@ -301,6 +327,7 @@ class _HomePageState extends State<HomePage> {
                   tooltipColor: Theme.of(context).colorScheme.secondaryContainer,
                   lineTooltipItemTextStyle: Theme.of(context).textTheme.bodySmall!,
                 ),
+                // const OpenPosition(),
               ],
             ),
           ],

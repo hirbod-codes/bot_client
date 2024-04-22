@@ -18,8 +18,9 @@ class SettingsPage extends StatefulWidget {
 
   static Future<String?> getOptions() async {
     try {
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null) return null;
+      await Future.delayed(const Duration(seconds: 1));
       return (await http.get(Uri.parse('${backendUrl}options/'), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''})).body;
     } catch (e) {
       return null;
@@ -40,6 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    AppStaticData.getSharedPreferences().then((value) => value.setString(AppDataKeys.options, ''));
     SettingsPage.getOptions();
   }
 

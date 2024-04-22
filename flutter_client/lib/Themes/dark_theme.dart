@@ -25,6 +25,7 @@ ThemeData darkTheme = FlexThemeData.dark(
     useInputDecoratorThemeInDialogs: true,
     switchSchemeColor: SchemeColor.secondary,
     switchThumbFixedSize: true,
+    navigationBarOpacity: 0,
     bottomNavigationBarOpacity: 0,
     bottomNavigationBarElevation: 0,
   ),

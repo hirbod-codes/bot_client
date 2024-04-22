@@ -38,7 +38,7 @@ class _OrderHistoryState extends State<OrderHistory> {
         _refreshing = true;
       });
 
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null) {
         snackBarMessage = 'No URL provided!';
         return;
@@ -127,51 +127,64 @@ class _OrderHistoryState extends State<OrderHistory> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: ListView(
-            children: [
-              Text(_symbol ?? 'Symbol'),
-              SizedBox(
-                height: double.maxFinite,
-                child: _refreshing
-                    ? const CircularProgressIndicator()
-                    : (_positions == null || _positions!.isEmpty
-                        ? const Text('Empty')
-                        : ScrollableTable(
-                            buildCell: (BuildContext b, TableVicinity tv) => tv.row == 0
-                                ? TableViewCell(
-                                    child: Center(
-                                      child: Wrap(
-                                        children: [
-                                          Text(_positions![0].keys.elementAt(tv.column)),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                : TableViewCell(
-                                    child: Center(
-                                      child: Wrap(
-                                        children: [
-                                          Text(_positions![tv.row - 1][_positions![0].keys.elementAt(tv.column)].toString()),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                            buildColumnSpan: (index) => const TableSpan(
-                              foregroundDecoration: TableSpanDecoration(),
-                              extent: FixedTableSpanExtent(100),
-                            ),
-                            buildRowSpan: (int index) => TableSpan(
-                              backgroundDecoration: TableSpanDecoration(
-                                color: index.isEven ? Colors.black.withOpacity(0.2) : null,
+          child: _refreshing
+              ? const CircularProgressIndicator()
+              : (_positions == null || (_positions?.isEmpty ?? true)
+                  ? Center(
+                      child: Wrap(
+                        children: [
+                          const Icon(Icons.dangerous_outlined),
+                          const Text('System failed to fetch orders.'),
+                        ]
+                            .map(
+                              (e) => Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: e,
                               ),
-                              extent: const FixedTableSpanExtent(50),
-                            ),
-                            columnsCount: _positions![0].keys.length,
-                            rowsCount: _positions!.length + 1,
-                          )),
-              ),
-            ],
-          ),
+                            )
+                            .toList(),
+                      ),
+                    )
+                  : ListView(
+                      children: [
+                        Text(_symbol ?? 'Symbol'),
+                        SizedBox(
+                            height: double.maxFinite,
+                            child: ScrollableTable(
+                              buildCell: (BuildContext b, TableVicinity tv) => tv.row == 0
+                                  ? TableViewCell(
+                                      child: Center(
+                                        child: Wrap(
+                                          children: [
+                                            Text(_positions![0].keys.elementAt(tv.column)),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  : TableViewCell(
+                                      child: Center(
+                                        child: Wrap(
+                                          children: [
+                                            Text(_positions![tv.row - 1][_positions![0].keys.elementAt(tv.column)].toString()),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                              buildColumnSpan: (index) => const TableSpan(
+                                foregroundDecoration: TableSpanDecoration(),
+                                extent: FixedTableSpanExtent(100),
+                              ),
+                              buildRowSpan: (int index) => TableSpan(
+                                backgroundDecoration: TableSpanDecoration(
+                                  color: index.isEven ? Colors.black.withOpacity(0.2) : null,
+                                ),
+                                extent: const FixedTableSpanExtent(50),
+                              ),
+                              columnsCount: _positions![0].keys.length,
+                              rowsCount: _positions!.length + 1,
+                            )),
+                      ],
+                    )),
         ),
       );
 }

@@ -17,28 +17,33 @@ class StrategyOptions extends StatefulWidget {
 class _StrategyOptionsState extends State<StrategyOptions> {
   final _providerName = TextEditingController();
 
+  bool _isLoading = false;
+  bool _isSubmitting = false;
+
   void _setFields(Map<String, dynamic>? options) {
-    if (options == null) return;
+    if (options == null || !options.keys.contains('strategyOptions')) return;
 
     setState(() {
-      _providerName.text = options['providerName'] ?? '';
+      _providerName.text = options["strategyOptions"]['providerName'] ?? '';
     });
   }
 
   @override
   void initState() {
-    SettingsPage.getOptions().then((options) {
-      if (options == null) return;
+    super.initState();
+    try {
+      setState(() => _isLoading = true);
+      SettingsPage.getOptions().then((options) {
+        if (options == null) return;
 
-      AppStaticData.getSharedPreferences().then((value) {
-        _setFields((jsonDecode(options) as Map<String, dynamic>)['strategyOptions']);
-      }).whenComplete(() {
-        super.initState();
+        AppStaticData.getSharedPreferences().then((value) {
+          _setFields((jsonDecode(options) as Map<String, dynamic>));
+        });
       });
-    });
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
-
-  bool _isSubmitting = false;
 
   void _submit() async {
     String snackBarMessage = 'Error';
@@ -51,7 +56,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
 
       if (_isSubmitting) return;
 
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null) {
         snackBarMessage = 'No URL provided';
         return;
@@ -61,9 +66,12 @@ class _StrategyOptionsState extends State<StrategyOptions> {
         _isSubmitting = true;
       });
 
-      var data = {"ProviderName": _providerName.text};
+      var data = jsonDecode(await SettingsPage.getOptions() ?? '{}') as Map<String, dynamic>;
+      data["strategyOptions"] = {
+        "ProviderName": _providerName.text,
+      };
 
-      http.Response res = await http.patch(Uri.parse('${backendUrl}strategy-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -98,6 +106,7 @@ class _StrategyOptionsState extends State<StrategyOptions> {
       padding: const EdgeInsets.all(8.0),
       child: ListView(
         children: [
+          (_isLoading || _isSubmitting) ? const Center(child: LinearProgressIndicator()) : null,
           TextField(
             controller: _providerName,
             keyboardType: TextInputType.number,

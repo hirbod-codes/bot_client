@@ -15,9 +15,11 @@ class SecurityOptionsState extends State<SecurityOptions> {
   final _port = TextEditingController();
   final _apiKey = TextEditingController();
 
+  bool _isSubmitting = false;
+
   @override
   void initState() {
-    initAsync().then((value) {
+    initAsync().whenComplete(() {
       super.initState();
     });
   }
@@ -29,6 +31,7 @@ class SecurityOptionsState extends State<SecurityOptions> {
   }
 
   Future<void> _submit() async {
+    setState(() => _isSubmitting = true);
     String snackBarMessage = 'Error';
 
     try {
@@ -51,11 +54,14 @@ class SecurityOptionsState extends State<SecurityOptions> {
 
       if (result == true) snackBarMessage = 'Successful';
     } finally {
-      App.showSnackBar(
-        snackBarMessage,
-        'Close',
-        () {},
-      );
+      setState(() {
+        _isSubmitting = false;
+        App.showSnackBar(
+          snackBarMessage,
+          'Close',
+          () {},
+        );
+      });
     }
   }
 
@@ -112,14 +118,19 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
           ),
-          space,
-          const SizedBox(
-            height: 70,
-            width: 10,
-          ),
-          ElevatedButton(onPressed: _submit, child: const Text('Update')),
-        ],
-      ),
-    );
-  }
+          _isSubmitting
+              ? const Center(child: CircularProgressIndicator())
+              : ElevatedButton(
+                  onPressed: _submit,
+                  child: const Text('Update'),
+                ),
+        ]
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                child: e,
+              ),
+            )
+            .toList(),
+      );
 }
