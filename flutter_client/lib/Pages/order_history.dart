@@ -59,20 +59,21 @@ class _OrderHistoryState extends State<OrderHistory> {
         _positions![position['symbol']] ??= [];
 
         _positions![position['symbol']]!.add({
+          "_": [position['openedAt'], position['positionDirection'], position['leverage'].toString() + 'X'],
           "Profit with commission": position['profitWithCommission'],
           "Commission": position['commission'],
-          "Position direction": position['positionDirection'],
           "Opened price": position['openedPrice'],
           "Closed price": position['closedPrice'],
           "Sl price": position['slPrice'],
           "Tp price": position['tpPrice'],
           "Profit": position['profit'],
           "Margin": position['margin'],
-          "Leverage": position['leverage'],
           "Created at": position['createdAt'],
           "Closed at": position['closedAt'],
           "Commission ratio": position['commissionRatio'],
           "Position status": position['positionStatus'],
+          "Position direction": position['positionDirection'],
+          "Leverage": position['leverage'],
           "Opened at": position['openedAt'],
           "Cancelled at": position['cancelledAt'],
         });
@@ -163,20 +164,30 @@ class _OrderHistoryState extends State<OrderHistory> {
                                               child: Center(
                                                 child: Wrap(
                                                   children: [
-                                                    Text(p.value[0].keys.elementAt(tv.column)),
+                                                    tv.column == 0 ? const Text('') : Text(p.value[0].keys.elementAt(tv.column)),
                                                   ],
                                                 ),
                                               ),
                                             )
-                                          : TableViewCell(
-                                              child: Center(
-                                                child: Wrap(
-                                                  children: [
-                                                    Text(p.value[tv.row - 1][p.value[0].keys.elementAt(tv.column)].toString()),
-                                                  ],
+                                          : tv.column == 0
+                                              ? TableViewCell(
+                                                  child: Center(
+                                                    child: Wrap(
+                                                      direction: Axis.vertical,
+                                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                                      children: (p.value[tv.row - 1][p.value[0].keys.elementAt(0)] as List<dynamic>).map((s) => Text(s.toString())).toList(),
+                                                    ),
+                                                  ),
+                                                )
+                                              : TableViewCell(
+                                                  child: Center(
+                                                    child: Wrap(
+                                                      children: [
+                                                        Text(p.value[tv.row - 1][p.value[0].keys.elementAt(tv.column)]?.toString() ?? '-'),
+                                                      ],
+                                                    ),
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
                                       buildColumnSpan: (index) => const TableSpan(
                                         foregroundDecoration: TableSpanDecoration(),
                                         extent: FixedTableSpanExtent(150),
@@ -185,7 +196,7 @@ class _OrderHistoryState extends State<OrderHistory> {
                                         backgroundDecoration: TableSpanDecoration(
                                           color: index.isEven ? Colors.black.withOpacity(0.2) : null,
                                         ),
-                                        extent: const FixedTableSpanExtent(50),
+                                        extent: const FixedTableSpanExtent(70),
                                       ),
                                       columnsCount: p.value[0].keys.length,
                                       rowsCount: p.value.length + 1,

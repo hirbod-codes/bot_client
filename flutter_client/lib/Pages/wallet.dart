@@ -42,7 +42,11 @@ class _WalletState extends State<Wallet> {
       body: ListView(
         children: const [
           Asset(),
-          Divider(),
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Divider(),
+          ),
+          Center(child: Text('Transactions')),
           Pnl(),
         ],
       ));
