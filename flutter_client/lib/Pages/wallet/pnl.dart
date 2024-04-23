@@ -44,7 +44,7 @@ class _PnlState extends State<Pnl> {
         _pnls![e['symbol']] ??= [];
 
         _pnls![e['symbol']]!.add({
-          "time": e['time'],
+          "time": e['time'].replaceAll(RegExp("T"), " "),
           "income": e['income'],
           "info": e['info'],
           "incomeType": e['incomeType'],
@@ -111,15 +111,33 @@ class _PnlState extends State<Pnl> {
                                           ),
                                         ),
                                       )
-                                    : TableViewCell(
-                                        child: Center(
-                                          child: Wrap(
-                                            children: [
-                                              Text(pnl.value[tv.row - 1][pnl.value[0].keys.elementAt(tv.column)].toString()),
-                                            ],
+                                    : tv.column == 1
+                                        ? TableViewCell(
+                                            child: Center(
+                                              child: Wrap(
+                                                children: [
+                                                  double.parse(pnl.value[tv.row - 1][pnl.value[0].keys.elementAt(tv.column)]) > 0
+                                                      ? Text(
+                                                          pnl.value[tv.row - 1][pnl.value[0].keys.elementAt(tv.column)].toString(),
+                                                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.green),
+                                                        )
+                                                      : Text(
+                                                          pnl.value[tv.row - 1][pnl.value[0].keys.elementAt(tv.column)].toString(),
+                                                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red.shade700),
+                                                        ),
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                        : TableViewCell(
+                                            child: Center(
+                                              child: Wrap(
+                                                children: [
+                                                  Text(pnl.value[tv.row - 1][pnl.value[0].keys.elementAt(tv.column)].toString()),
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
                                 buildColumnSpan: (index) => const TableSpan(
                                   foregroundDecoration: TableSpanDecoration(),
                                   extent: FixedTableSpanExtent(150),

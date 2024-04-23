@@ -11,6 +11,8 @@ class App extends StatefulWidget {
 
   static void showSnackBar(String content, String label, void Function() onPressed) => rootScaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.only(left: 10, right: 10, bottom: 70),
           content: Text(content),
           action: SnackBarAction(
             label: label,

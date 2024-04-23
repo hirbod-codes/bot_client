@@ -59,7 +59,7 @@ class _OrderHistoryState extends State<OrderHistory> {
         _positions![position['symbol']] ??= [];
 
         _positions![position['symbol']]!.add({
-          "_": [position['openedAt'], position['positionDirection'], position['leverage'].toString() + 'X'],
+          "_": [position['openedAt'].replaceAll(RegExp("T"), " "), position['positionDirection'], '${position['leverage']}X'],
           "Profit with commission": position['profitWithCommission'],
           "Commission": position['commission'],
           "Opened price": position['openedPrice'],
@@ -175,19 +175,48 @@ class _OrderHistoryState extends State<OrderHistory> {
                                                     child: Wrap(
                                                       direction: Axis.vertical,
                                                       crossAxisAlignment: WrapCrossAlignment.center,
-                                                      children: (p.value[tv.row - 1][p.value[0].keys.elementAt(0)] as List<dynamic>).map((s) => Text(s.toString())).toList(),
+                                                      children: (p.value[tv.row - 1][p.value[0].keys.elementAt(0)] as List<dynamic>)
+                                                          .asMap()
+                                                          .entries
+                                                          .map(
+                                                            (s) => s.key == 1
+                                                                ? Text(
+                                                                    s.value.toString(),
+                                                                    style: s.value.toString().toLowerCase() == 'long' ? Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.green) : Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red),
+                                                                  )
+                                                                : Text(s.value.toString()),
+                                                          )
+                                                          .toList(),
                                                     ),
                                                   ),
                                                 )
-                                              : TableViewCell(
-                                                  child: Center(
-                                                    child: Wrap(
-                                                      children: [
-                                                        Text(p.value[tv.row - 1][p.value[0].keys.elementAt(tv.column)]?.toString() ?? '-'),
-                                                      ],
+                                              : tv.column == 1
+                                                  ? TableViewCell(
+                                                      child: Center(
+                                                        child: Wrap(
+                                                          children: [
+                                                            p.value[tv.row - 1][p.value[0].keys.elementAt(tv.column)] > 0
+                                                                ? Text(
+                                                                    p.value[tv.row - 1][p.value[0].keys.elementAt(tv.column)]?.toString() ?? '-',
+                                                                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.green),
+                                                                  )
+                                                                : Text(
+                                                                    p.value[tv.row - 1][p.value[0].keys.elementAt(tv.column)]?.toString() ?? '-',
+                                                                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red.shade700),
+                                                                  ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : TableViewCell(
+                                                      child: Center(
+                                                        child: Wrap(
+                                                          children: [
+                                                            Text(p.value[tv.row - 1][p.value[0].keys.elementAt(tv.column)]?.toString() ?? '-'),
+                                                          ],
+                                                        ),
+                                                      ),
                                                     ),
-                                                  ),
-                                                ),
                                       buildColumnSpan: (index) => const TableSpan(
                                         foregroundDecoration: TableSpanDecoration(),
                                         extent: FixedTableSpanExtent(150),

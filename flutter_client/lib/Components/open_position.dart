@@ -1,169 +1,160 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_client/Data/app_data.dart';
-import 'package:flutter_client/main.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class OpenPosition extends StatefulWidget {
-  const OpenPosition({super.key});
+  const OpenPosition({super.key, required List<dynamic> positions, required String symbol, required String timeFrame})
+      : _positions = positions,
+        _symbol = symbol,
+        _timeFrame = timeFrame;
+
+  final String _symbol;
+  final String _timeFrame;
+  final List<dynamic> _positions;
 
   @override
   State<OpenPosition> createState() => _OpenPositionState();
 }
 
 class _OpenPositionState extends State<OpenPosition> {
-  String? _listenKey;
-
   WebSocketChannel? _channel;
-  final List<String> _websocketEventsWidget = [''];
-  Widget _websocketReasonWidget = const Text('_websocketreasonWidget');
-  Widget _websocketErrorWidget = const Text('_websocketErrorWidget');
-  Widget _websocketAccountConfigWidget = const Text('_websocketAccountConfigWidget');
-  Widget _websocketAccountWidget = const Text('_websocketAccountWidget');
-  int _pingCount = 0;
 
-  final bool _isExpired = false;
+  bool _isSubscribed = false;
+
+  double? _price;
 
   @override
   void initState() {
     super.initState();
-    getListenKey().then((value) {
-      initWebSocket();
-    });
+    print(widget._positions);
+    _initWebSocket();
   }
 
-  Future getListenKey() async {
-    String snackBarMessage = '';
-    try {
-      SharedPreferences sharedPreferences = await AppStaticData.getSharedPreferences();
+  void _initWebSocket() {
+    if (_channel != null) return;
 
-      _listenKey = sharedPreferences.getString(AppDataKeys.listenKey);
-
-      if (!_isExpired && _listenKey != null) {
-        snackBarMessage = "listen key already fetched.";
-        return;
-      }
-
-      String? optionsJson = sharedPreferences.getString(AppDataKeys.options);
-      if (optionsJson?.isEmpty ?? true) {
-        snackBarMessage = 'Options are not available.';
-        return;
-      }
-
-      String? apiKey = (jsonDecode(optionsJson!) as Map<String, dynamic>)['brokerOptions']?['apiKey'];
-
-      if (apiKey?.isEmpty ?? true) {
-        snackBarMessage = 'Options are not available.';
-        return;
-      }
-
-      http.Response res = await http.post(
-        Uri.parse("https://open-api.bingx.com/openApi/user/auth/userDataStream"),
-        headers: {
-          HttpHeaders.contentTypeHeader: ContentType.json.primaryType,
-          "X-BX-APIKEY": apiKey!,
-        },
-      );
-      _listenKey = (jsonDecode(res.body) as Map<String, dynamic>)['listenKey'];
-      bool result = await sharedPreferences.setString(AppDataKeys.listenKey, _listenKey!);
-      if (result) snackBarMessage = "listen key fetched.";
-    } finally {
-      setState(() {
-        if (snackBarMessage != '') {
-          App.showSnackBar(
-            snackBarMessage,
-            'Close',
-            () {},
-          );
-        }
-      });
-    }
-  }
-
-  void initWebSocket() {
-    if (_listenKey == null) return;
-
-    _channel = WebSocketChannel.connect(Uri.parse("wss://open-api-swap.bingx.com/swap-market?listenKey=$_listenKey"));
+    _channel = WebSocketChannel.connect(Uri.parse("wss://open-api-swap.bingx.com/swap-market"));
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8.0),
         child: _channel == null
             ? const Center(child: CircularProgressIndicator())
-            : StreamBuilder(
-                key: widget.key,
-                stream: _channel!.stream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    if (_listenKey == null) {
-                      getListenKey().then((value) => initWebSocket());
-                    } else {
-                      initState();
+            : SizedBox(
+                height: 500,
+                child: StreamBuilder(
+                  key: widget.key,
+                  stream: _channel!.stream,
+                  builder: (context, snapshot) {
+                    if (!_isSubscribed) {
+                      var json = jsonEncode({
+                        "id": "1651641469541",
+                        "reqType": "sub",
+                        "dataType": "${widget._symbol}@kline_${widget._timeFrame}",
+                      });
+                      Uint8List utf8encode = utf8.encode(json);
+                      _channel!.sink.add(utf8encode);
+
+                      _isSubscribed = true;
                     }
 
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  try {
                     if (!snapshot.hasData || snapshot.hasError) return const Center(child: CircularProgressIndicator());
                     final decodeGZipJson = gzip.decode(snapshot.data);
                     final rawMessage = utf8.decode(decodeGZipJson);
 
                     if (rawMessage == "Ping") {
                       _channel!.sink.add("Pong");
-                      _pingCount++;
                     } else {
-                      Map<String, dynamic> response = jsonDecode(rawMessage) as Map<String, dynamic>;
+                      Map<String, dynamic>? response = jsonDecode(rawMessage) as Map<String, dynamic>?;
 
-                      _websocketReasonWidget = Text(response['m'] ?? "null");
-                      _websocketEventsWidget.add(response['e'] ?? "null");
+                      String? close = response?['data']?[0]['c'];
 
-                      if (response['e'] == 'listenKeyExpired') {
-                        getListenKey().then((value) => initWebSocket());
-                        return const Text('Expired');
-                      }
-
-                      if (response['e'] == 'ACCOUNT_CONFIG_UPDATE') {
-                        _websocketAccountConfigWidget = Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(response['ac']?['s']?.toString() ?? "null"),
-                            Text(response['ac']?['l']?.toString() ?? "null"),
-                            Text(response['ac']?['S']?.toString() ?? "null"),
-                            Text(response['ac']?['mt']?.toString() ?? "null"),
-                          ],
-                        );
-                      }
-
-                      if (response['e'] == 'ACCOUNT_UPDATE') {
-                        _websocketAccountWidget = Column(
-                          children: [
-                            Text(response['a']?['P']?[0]?['up']?.toString() ?? "null"),
-                          ],
-                        );
-                      }
+                      if (close != null) _price = double.parse(close);
                     }
-                  } catch (e) {
-                    _websocketErrorWidget = Text(e.toString());
-                  }
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(_pingCount.toString()),
-                      _websocketErrorWidget,
-                      _websocketReasonWidget,
-                      ..._websocketEventsWidget.map((e) => Text(e)),
-                      _websocketAccountConfigWidget,
-                      _websocketAccountWidget,
-                    ],
-                  );
-                },
+                    return _price == null
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView(
+                            children: widget._positions.map(
+                            (e) {
+                              double openedPrice = e['openedPrice'].runtimeType == String ? double.parse(e['openedPrice']) : e['openedPrice'].toDouble();
+                              double leverage = e['leverage'].runtimeType == String ? double.parse(e['leverage']) : e['leverage'].toDouble();
+                              double margin = e['margin'].runtimeType == String ? double.parse(e['margin']) : e['margin'].toDouble();
+                              double unrealizedPnL = (_price! - openedPrice) * leverage * margin / openedPrice;
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.background.withOpacity(0.1),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 24, right: 24, top: 8, bottom: 8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Wrap(
+                                        direction: Axis.horizontal,
+                                        children: [
+                                          RawChip(
+                                            elevation: 10,
+                                            visualDensity: const VisualDensity(vertical: -4),
+                                            label: Text(
+                                              e['positionDirection'].toString(),
+                                              style: e['positionDirection'].toString().toLowerCase() == 'long'
+                                                  ? Theme.of(context).textTheme.bodySmall!.copyWith(
+                                                        color: Colors.green,
+                                                      )
+                                                  : Theme.of(context).textTheme.bodySmall!.copyWith(
+                                                        color: Colors.red,
+                                                      ),
+                                            ),
+                                          ),
+                                          RawChip(
+                                            elevation: 10,
+                                            visualDensity: const VisualDensity(vertical: -4),
+                                            label: Text('${e['leverage'].toString()}X'),
+                                          ),
+                                        ]
+                                            .map((e) => Padding(
+                                                  padding: EdgeInsets.only(right: 8),
+                                                  child: e,
+                                                ))
+                                            .toList(),
+                                      ),
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: Wrap(
+                                          alignment: WrapAlignment.spaceBetween,
+                                          children: [
+                                            const Text('Unrealized PnL'),
+                                            Text(
+                                              unrealizedPnL.toStringAsFixed(4),
+                                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: unrealizedPnL > 0 ? Colors.green : Colors.red.shade700),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: Wrap(
+                                          alignment: WrapAlignment.spaceBetween,
+                                          children: [
+                                            const Text('Commission'),
+                                            Text(e['commission'].toString()),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ).toList());
+                  },
+                ),
               ),
       );
 }

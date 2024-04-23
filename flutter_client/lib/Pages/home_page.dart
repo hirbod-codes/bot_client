@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_client/Components/open_positions.dart';
 import 'package:flutter_client/Data/app_data.dart';
+import 'package:flutter_client/Pages/settings_page.dart';
 import 'package:flutter_client/Themes/theme.dart';
 import 'package:flutter_client/main.dart';
 import 'package:http/http.dart' as http;
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,7 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Widget Function(dynamic context) _status = (context) => const Icon(Icons.question_mark_outlined, size: 50);
+  Widget Function(dynamic context) _status = (context) => const Icon(Icons.question_mark_outlined);
 
   bool _loading = false;
 
@@ -78,13 +81,9 @@ class _HomePageState extends State<HomePage> {
         _loading = false;
 
         if (!wasSuccessful) {
-          _status = (context) => SizedBox(
-                width: 35,
-                height: 35,
-                child: FloatingActionButton(
-                  onPressed: _getStatus,
-                  child: const Icon(Icons.refresh_outlined),
-                ),
+          _status = (context) => FloatingActionButton(
+                onPressed: _getStatus,
+                child: const Icon(Symbols.refresh_sharp),
               );
         }
 
@@ -144,16 +143,24 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    AppStaticData.getSharedPreferences().then((v) {
-      _fullName = v.getString(AppDataKeys.fullName);
-      _brokerName = v.getString(AppDataKeys.brokerName);
-    }).whenComplete(() => setState(() {}));
+    _init();
+  }
+
+  Future _init() async {
+    String? optionsJson = await SettingsPage.getOptions();
+    if (optionsJson == null) return;
+    Map<String, dynamic> options = jsonDecode(optionsJson) as Map<String, dynamic>;
+    _fullName = options[AppDataKeys.fullName];
+    _brokerName = options[AppDataKeys.brokerName];
+
+    setState(() {});
+
     _getStatus();
   }
 
-  final Icon _lightIcon = const Icon(Icons.light_mode_outlined);
-  final Icon _darkIcon = const Icon(Icons.dark_mode_outlined);
-  Icon _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? const Icon(Icons.light_mode_outlined) : const Icon(Icons.dark_mode_outlined);
+  final Icon _lightIcon = const Icon(Symbols.light_mode_sharp);
+  final Icon _darkIcon = const Icon(Symbols.dark_mode_sharp);
+  Icon _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? const Icon(Symbols.light_mode_sharp) : const Icon(Symbols.dark_mode_sharp);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -163,13 +170,13 @@ class _HomePageState extends State<HomePage> {
               ? null
               : Row(
                   children: [
-                    const CircleAvatar(child: Icon(Icons.account_circle_outlined)),
+                    const CircleAvatar(child: Icon(Symbols.account_circle_sharp)),
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          !_fullName!.contains('-') ? Text('${_fullName!.split('-')[0]} ${_fullName!.split('-')[1]}') : Text(_fullName!),
+                          _fullName!.contains('-') ? Text('${_fullName!.split('-')[0]} ${_fullName!.split('-')[1]}') : Text(_fullName!),
                           Text(
                             _brokerName!,
                             style: Theme.of(context).textTheme.bodySmall,
@@ -180,135 +187,120 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
           actions: [
-            SizedBox(
-              height: 70,
-              width: 70,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                child: Switch(
-                  inactiveTrackColor: Theme.of(context).colorScheme.secondaryContainer,
-                  key: ValueKey<Icon>(_themeSwitchIcon),
-                  thumbIcon: MaterialStateProperty.all(_themeSwitchIcon),
-                  value: customTheme.themeMode == ThemeMode.light,
-                  onChanged: (bool value) {
-                    customTheme.toggleTheme();
-                    setState(() {
-                      _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? _lightIcon : _darkIcon;
-                    });
-                  },
-                ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: Switch(
+                inactiveTrackColor: Theme.of(context).colorScheme.secondaryContainer,
+                key: ValueKey<Icon>(_themeSwitchIcon),
+                thumbIcon: MaterialStateProperty.all(_themeSwitchIcon),
+                value: customTheme.themeMode == ThemeMode.light,
+                onChanged: (bool value) {
+                  customTheme.toggleTheme();
+                  setState(() {
+                    _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? _lightIcon : _darkIcon;
+                  });
+                },
               ),
             ),
-            SizedBox(
-              height: 35,
-              width: 35,
-              child: FloatingActionButton(
-                onPressed: _getStatus,
-                child: const Icon(Icons.refresh_outlined),
-              ),
+            IconButton(
+              onPressed: _getStatus,
+              icon: const Icon(Symbols.refresh_sharp),
             ),
           ],
         ),
         body: ListView(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0, left: 8.0),
-                  child: Text('Status'),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: (_loading || _isSubmitting) ? const CircularProgressIndicator() : _status(context),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) => constraints.maxWidth > 340
-                      ? Center(
-                          child: SegmentedButton(
-                            showSelectedIcon: false,
-                            emptySelectionAllowed: true,
-                            segments: const [
-                              ButtonSegment(enabled: true, value: 'start', label: Text('Start'), icon: Icon(Icons.play_arrow_outlined)),
-                              ButtonSegment(enabled: true, value: 'suspend', label: Text('Suspend'), icon: Icon(Icons.pause_outlined)),
-                              ButtonSegment(enabled: true, value: 'stop', label: Text('Stop'), icon: Icon(Icons.stop_outlined)),
-                            ],
-                            selected: <String>{_selectedStatus},
-                            onSelectionChanged: (s) {
-                              switch (s.first) {
-                                case 'start':
-                                  _start();
-                                  break;
-                                case 'suspend':
-                                  _suspend();
-                                  break;
-                                case 'stop':
-                                  _stop();
-                                  break;
-                                default:
-                              }
-                              setState(() {
-                                _selectedStatus = s.first;
-                              });
-                            },
-                          ),
-                        )
-                      : Center(
-                          child: Wrap(
-                            direction: Axis.horizontal,
-                            children: [
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              FilledButton(
-                                onPressed: _start,
-                                child: const Wrap(
-                                  direction: Axis.horizontal,
-                                  children: [
-                                    Icon(Icons.play_arrow_outlined),
-                                    Text('Start'),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              FilledButton(
-                                onPressed: _suspend,
-                                child: const Wrap(
-                                  direction: Axis.horizontal,
-                                  children: [
-                                    Icon(Icons.pause_outlined),
-                                    Text('Suspend'),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 2,
-                              ),
-                              FilledButton(
-                                onPressed: _stop,
-                                child: const Wrap(
-                                  direction: Axis.horizontal,
-                                  children: [
-                                    Icon(Icons.stop_outlined),
-                                    Text('Stop'),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                ),
-                const SizedBox(
-                  height: 90,
-                ),
-                // const OpenPosition(),
-              ],
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0, left: 8.0),
+              child: Text('Status'),
             ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: (_loading || _isSubmitting) ? const Center(child: CircularProgressIndicator()) : _status(context),
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) => constraints.maxWidth > 340
+                  ? Center(
+                      child: SegmentedButton(
+                        showSelectedIcon: false,
+                        emptySelectionAllowed: true,
+                        segments: const [
+                          ButtonSegment(enabled: true, value: 'start', label: Text('Start'), icon: Icon(Symbols.play_arrow_sharp)),
+                          ButtonSegment(enabled: true, value: 'suspend', label: Text('Suspend'), icon: Icon(Symbols.pause_sharp)),
+                          ButtonSegment(enabled: true, value: 'stop', label: Text('Stop'), icon: Icon(Symbols.stop_sharp)),
+                        ],
+                        selected: <String>{_selectedStatus},
+                        onSelectionChanged: (s) {
+                          switch (s.first) {
+                            case 'start':
+                              _start();
+                              break;
+                            case 'suspend':
+                              _suspend();
+                              break;
+                            case 'stop':
+                              _stop();
+                              break;
+                            default:
+                          }
+                          setState(() {
+                            _selectedStatus = s.first;
+                          });
+                        },
+                      ),
+                    )
+                  : Center(
+                      child: Wrap(
+                        direction: Axis.horizontal,
+                        children: [
+                          const SizedBox(
+                            width: 2,
+                          ),
+                          FilledButton(
+                            onPressed: _start,
+                            child: const Wrap(
+                              direction: Axis.horizontal,
+                              children: [
+                                Icon(Icons.play_arrow_outlined),
+                                Text('Start'),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 2,
+                          ),
+                          FilledButton(
+                            onPressed: _suspend,
+                            child: const Wrap(
+                              direction: Axis.horizontal,
+                              children: [
+                                Icon(Icons.pause_outlined),
+                                Text('Suspend'),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 2,
+                          ),
+                          FilledButton(
+                            onPressed: _stop,
+                            child: const Wrap(
+                              direction: Axis.horizontal,
+                              children: [
+                                Icon(Icons.stop_outlined),
+                                Text('Stop'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+            const Divider(),
+            const OpenPositions(),
           ],
         ),
       );

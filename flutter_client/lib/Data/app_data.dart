@@ -6,8 +6,8 @@ class AppDataKeys {
   static String backendPort = 'BackendPort';
   static String backendAuthKey = 'BackendAuthKey';
   static String options = 'Options';
-  static String brokerName = 'BrokerName';
-  static String fullName = 'FullName';
+  static String brokerName = 'brokerName';
+  static String fullName = 'fullName';
 }
 
 class AppDataRepository {

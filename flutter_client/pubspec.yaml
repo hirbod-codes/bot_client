@@ -41,6 +41,9 @@ dependencies:
   fl_chart: ^0.67.0
   web_socket_channel: ^2.4.5
   two_dimensional_scrollables: ^0.2.1
+  font_awesome_flutter: ^10.7.0
+  fluentui_system_icons: ^1.1.236
+  material_symbols_icons: ^4.2719.3
 
 dev_dependencies:
   flutter_test:
