@@ -215,7 +215,7 @@ class _HomePageState extends State<HomePage> {
               child: Text('Status'),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 8.0),
+              padding: const EdgeInsets.all(8.0),
               child: (_loading || _isSubmitting) ? const Center(child: CircularProgressIndicator()) : _status(context),
             ),
             const SizedBox(
