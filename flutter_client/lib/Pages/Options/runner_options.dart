@@ -18,34 +18,39 @@ class _RunnerOptionsState extends State<RunnerOptions> {
   String? _timeFrame = AppStaticData.timeFrames.keys.first;
   final _historicalCandlesCount = TextEditingController();
 
+  bool _isLoading = false;
+  bool _isSubmitting = false;
+
   void _setFields(Map<String, dynamic>? options) {
-    if (options == null) return;
+    if (options == null || !options.keys.contains('runnerOptions')) return;
 
     String tf = '';
     AppStaticData.timeFrames.forEach((key, value) {
-      if (options['timeFrame'] != null && value == (options['timeFrame'] as int)) tf = key;
+      if (options["runnerOptions"]['timeFrame'] != null && value == (options["runnerOptions"]['timeFrame'] as int)) tf = key;
     });
 
     setState(() {
       _timeFrame = tf;
-      _historicalCandlesCount.text = options['historicalCandlesCount']?.toString() ?? '';
+      _historicalCandlesCount.text = options["runnerOptions"]['historicalCandlesCount']?.toString() ?? '';
     });
   }
 
   @override
   void initState() {
-    SettingsPage.getOptions().then((options) {
-      if (options == null) return;
+    super.initState();
+    try {
+      setState(() => _isLoading = true);
+      SettingsPage.getOptions().then((options) {
+        if (options == null) return;
 
-      AppStaticData.getSharedPreferences().then((value) {
-        _setFields((jsonDecode(options) as Map<String, dynamic>)['runnerOptions']);
-      }).whenComplete(() {
-        super.initState();
+        AppStaticData.getSharedPreferences().then((value) {
+          _setFields((jsonDecode(options) as Map<String, dynamic>));
+        });
       });
-    });
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
-
-  bool _isSubmitting = false;
 
   void _submit() async {
     String snackBarMessage = 'Error';
@@ -58,7 +63,7 @@ class _RunnerOptionsState extends State<RunnerOptions> {
 
       if (_isSubmitting) return;
 
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null) {
         snackBarMessage = 'No URL provided';
         return;
@@ -68,9 +73,13 @@ class _RunnerOptionsState extends State<RunnerOptions> {
         _isSubmitting = true;
       });
 
-      var data = {"TimeFrame": AppStaticData.timeFrames[_timeFrame], "HistoricalCandlesCount": int.parse(_historicalCandlesCount.text)};
+      var data = jsonDecode(await SettingsPage.getOptions() ?? '{}') as Map<String, dynamic>;
+      data["runnerOptions"] = {
+        "TimeFrame": AppStaticData.timeFrames[_timeFrame],
+        "HistoricalCandlesCount": int.parse(_historicalCandlesCount.text),
+      };
 
-      http.Response res = await http.patch(Uri.parse('${backendUrl}runner-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -97,6 +106,7 @@ class _RunnerOptionsState extends State<RunnerOptions> {
   @override
   Widget build(BuildContext context) => ListView(
         children: [
+          (_isLoading || _isSubmitting) ? const Center(child: LinearProgressIndicator()) : null,
           TextField(
             controller: _historicalCandlesCount,
             keyboardType: TextInputType.number,

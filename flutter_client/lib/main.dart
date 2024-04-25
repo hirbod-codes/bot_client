@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_client/Pages/main_page.dart';
 import 'package:flutter_client/Themes/theme.dart';
+import 'package:flutter_client/main_container.dart';
 
 void main() => runApp(const App());
 
@@ -11,6 +11,8 @@ class App extends StatefulWidget {
 
   static void showSnackBar(String content, String label, void Function() onPressed) => rootScaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.only(left: 10, right: 10, bottom: 70),
           content: Text(content),
           action: SnackBarAction(
             label: label,
@@ -31,15 +33,13 @@ class _AppState extends State<App> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      scaffoldMessengerKey: rootScaffoldMessengerKey,
-      title: 'Trading Bot',
-      themeMode: customTheme.themeMode,
-      theme: customTheme.customLightTheme,
-      darkTheme: customTheme.customDarkTheme,
-      debugShowCheckedModeBanner: false,
-      home: const MainPage(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+        scaffoldMessengerKey: rootScaffoldMessengerKey,
+        title: 'Trading Bot',
+        themeMode: customTheme.themeMode,
+        theme: customTheme.customLightTheme,
+        darkTheme: customTheme.customDarkTheme,
+        debugShowCheckedModeBanner: false,
+        home: const MainContainer(),
+      );
 }

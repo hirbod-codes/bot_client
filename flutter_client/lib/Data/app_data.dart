@@ -1,14 +1,17 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppDataKeys {
+  static String listenKey = 'ListenKey';
   static String backendDomain = 'BackendDomain';
   static String backendPort = 'BackendPort';
   static String backendAuthKey = 'BackendAuthKey';
   static String options = 'Options';
+  static String brokerName = 'brokerName';
+  static String fullName = 'fullName';
 }
 
 class AppDataRepository {
-  static Future<String?> GetBackendUrl() async {
+  static Future<String?> getBackendUrl() async {
     String? domain = (await AppStaticData.getSharedPreferences()).getString(AppDataKeys.backendDomain);
     int? port = (await AppStaticData.getSharedPreferences()).getInt(AppDataKeys.backendPort);
     String? authKey = (await AppStaticData.getSharedPreferences()).getString(AppDataKeys.backendAuthKey);

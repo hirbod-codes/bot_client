@@ -15,9 +15,11 @@ class SecurityOptionsState extends State<SecurityOptions> {
   final _port = TextEditingController();
   final _apiKey = TextEditingController();
 
+  bool _isSubmitting = false;
+
   @override
   void initState() {
-    initAsync().then((value) {
+    initAsync().whenComplete(() {
       super.initState();
     });
   }
@@ -29,6 +31,7 @@ class SecurityOptionsState extends State<SecurityOptions> {
   }
 
   Future<void> _submit() async {
+    setState(() => _isSubmitting = true);
     String snackBarMessage = 'Error';
 
     try {
@@ -51,16 +54,21 @@ class SecurityOptionsState extends State<SecurityOptions> {
 
       if (result == true) snackBarMessage = 'Successful';
     } finally {
-      App.showSnackBar(
-        snackBarMessage,
-        'Close',
-        () {},
-      );
+      setState(() {
+        _isSubmitting = false;
+        App.showSnackBar(
+          snackBarMessage,
+          'Close',
+          () {},
+        );
+      });
     }
   }
 
   @override
-  Widget build(BuildContext context) => ListView(
+  Widget build(BuildContext context) => Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ListView(
         children: [
           TextField(
             controller: _domain,
@@ -76,6 +84,10 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
           ),
+          const SizedBox(
+            width: 10,
+            height: 35,
+          ),
           TextField(
             controller: _port,
             keyboardType: TextInputType.number,
@@ -90,6 +102,10 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
           ),
+          const SizedBox(
+            width: 10,
+            height: 35,
+          ),
           TextField(
             controller: _apiKey,
             decoration: const InputDecoration(
@@ -102,10 +118,12 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             ),
           ),
-          ElevatedButton(
-            onPressed: _submit,
-            child: const Text('Update'),
-          ),
+          _isSubmitting
+              ? const Center(child: CircularProgressIndicator())
+              : ElevatedButton(
+                  onPressed: _submit,
+                  child: const Text('Update'),
+                ),
         ]
             .map(
               (e) => Padding(
@@ -114,5 +132,6 @@ class SecurityOptionsState extends State<SecurityOptions> {
               ),
             )
             .toList(),
-      );
+      ),
+    );
 }

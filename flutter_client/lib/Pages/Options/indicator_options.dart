@@ -21,38 +21,43 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
   final _superTrendMultiplier = TextEditingController();
   String? _superTrendCandlePart = AppStaticData.candleParts.keys.first;
 
+  bool _isLoading = false;
+  bool _isSubmitting = false;
+
   void _setFields(Map<String, dynamic>? options) {
-    if (options == null) return;
+    if (options == null || !options.keys.contains('indicatorOptions')) return;
 
     String cp = '';
     AppStaticData.candleParts.forEach((key, value) {
-      if (options['superTrendOptions']['candlePart'] != null && value == (options['superTrendOptions']['candlePart'] as int)) cp = key;
+      if (options["indicatorOptions"]['superTrendOptions']['candlePart'] != null && value == (options["indicatorOptions"]['superTrendOptions']['candlePart'] as int)) cp = key;
     });
 
     setState(() {
       _superTrendCandlePart = cp;
 
-      _atrPeriod.text = options['atr']['period']?.toString() ?? '';
-      _atrMultiplier.text = options['atrMultiplier']?.toString() ?? '';
-      _superTrendPeriod.text = options['superTrendOptions']['period']?.toString() ?? '';
-      _superTrendMultiplier.text = options['superTrendOptions']['multiplier']?.toString() ?? '';
+      _atrPeriod.text = options["indicatorOptions"]['atr']['period']?.toString() ?? '';
+      _atrMultiplier.text = options["indicatorOptions"]['atrMultiplier']?.toString() ?? '';
+      _superTrendPeriod.text = options["indicatorOptions"]['superTrendOptions']['period']?.toString() ?? '';
+      _superTrendMultiplier.text = options["indicatorOptions"]['superTrendOptions']['multiplier']?.toString() ?? '';
     });
   }
 
   @override
   void initState() {
-    SettingsPage.getOptions().then((options) {
-      if (options == null) return;
+    super.initState();
+    try {
+      setState(() => _isLoading = true);
+      SettingsPage.getOptions().then((options) {
+        if (options == null) return;
 
-      AppStaticData.getSharedPreferences().then((value) {
-        _setFields((jsonDecode(options) as Map<String, dynamic>)['indicatorOptions']);
-      }).whenComplete(() {
-        super.initState();
+        AppStaticData.getSharedPreferences().then((value) {
+          _setFields((jsonDecode(options) as Map<String, dynamic>));
+        });
       });
-    });
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
-
-  bool _isSubmitting = false;
 
   void _submit() async {
     String snackBarMessage = 'Error';
@@ -65,7 +70,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
 
       if (_isSubmitting) return;
 
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null) {
         snackBarMessage = 'No URL provided';
         return;
@@ -75,13 +80,14 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
         _isSubmitting = true;
       });
 
-      var data = {
+      var data = jsonDecode(await SettingsPage.getOptions() ?? '{}') as Map<String, dynamic>;
+      data["indicatorOptions"] = {
         "Atr": {"Period": int.parse(_atrPeriod.text), "Source": "close"},
         "AtrMultiplier": double.parse(_atrMultiplier.text),
         "SuperTrendOptions": {"Period": int.parse(_superTrendPeriod.text), "Multiplier": double.parse(_superTrendMultiplier.text), "CandlePart": AppStaticData.candleParts[_superTrendCandlePart], "ChangeATRCalculationMethod": true}
       };
 
-      http.Response res = await http.patch(Uri.parse('${backendUrl}indicator-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -108,6 +114,7 @@ class _IndicatorOptionsState extends State<IndicatorOptions> {
   @override
   Widget build(BuildContext context) => ListView(
         children: [
+          (_isLoading || _isSubmitting) ? const Center(child: LinearProgressIndicator()) : null,
           const Center(
             child: Text('ATR'),
           ),

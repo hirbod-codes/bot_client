@@ -24,38 +24,41 @@ class _BrokerOptionsState extends State<BrokerOptions> {
   final _apiSecret = TextEditingController();
 
   void _setFields(Map<String, dynamic>? options) {
-    if (options == null) return;
+    if (options == null || !options.keys.contains('brokerOptions')) return;
 
     String tf = '';
     AppStaticData.timeFrames.forEach((key, value) {
-      if (options['timeFrame'] != null && value == (options['timeFrame'] as int)) tf = key;
+      if (options["brokerOptions"]['timeFrame'] != null && value == (options["brokerOptions"]['timeFrame'] as int)) tf = key;
     });
 
     setState(() {
       _timeFrame = tf;
 
-      _symbol.text = options['symbol'] ?? '';
-      _brokerCommission.text = options['brokerCommission']?.toString() ?? '';
-      _baseUrl.text = options['baseUrl'] ?? '';
-      _apiKey.text = options['apiKey'] ?? '';
-      _apiSecret.text = options['apiSecret'] ?? '';
+      _symbol.text = options["brokerOptions"]['symbol'] ?? '';
+      _brokerCommission.text = options["brokerOptions"]['brokerCommission']?.toString() ?? '';
+      _baseUrl.text = options["brokerOptions"]['baseUrl'] ?? '';
+      _apiKey.text = options["brokerOptions"]['apiKey'] ?? '';
+      _apiSecret.text = options["brokerOptions"]['apiSecret'] ?? '';
     });
   }
 
   bool _isSubmitting = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
+    super.initState();
     try {
+      setState(() => _isLoading = true);
       SettingsPage.getOptions().then((options) {
         if (options == null) return;
 
         AppStaticData.getSharedPreferences().then((value) {
-          _setFields((jsonDecode(options) as Map<String, dynamic>)['brokerOptions']);
+          _setFields((jsonDecode(options) as Map<String, dynamic>));
         });
       });
     } finally {
-      super.initState();
+      setState(() => _isLoading = false);
     }
   }
 
@@ -70,7 +73,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
 
       if (_isSubmitting) return;
 
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null) {
         snackBarMessage = 'No URL provided';
         return;
@@ -80,9 +83,17 @@ class _BrokerOptionsState extends State<BrokerOptions> {
         _isSubmitting = true;
       });
 
-      var data = {"TimeFrame": AppStaticData.timeFrames[_timeFrame], "Symbol": _symbol.text, "BrokerCommission": double.parse(_brokerCommission.text), "BaseUrl": _baseUrl.text, "ApiKey": _apiKey.text, "ApiSecret": _apiSecret.text};
+      var data = jsonDecode(await SettingsPage.getOptions() ?? '{}') as Map<String, dynamic>;
+      data["brokerOptions"] = {
+        "TimeFrame": AppStaticData.timeFrames[_timeFrame],
+        "Symbol": _symbol.text,
+        "BrokerCommission": double.parse(_brokerCommission.text),
+        "BaseUrl": _baseUrl.text,
+        "ApiKey": _apiKey.text,
+        "ApiSecret": _apiSecret.text,
+      };
 
-      http.Response res = await http.patch(Uri.parse('${backendUrl}broker-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -111,6 +122,7 @@ class _BrokerOptionsState extends State<BrokerOptions> {
   @override
   Widget build(BuildContext context) => ListView(
         children: [
+          (_isLoading || _isSubmitting) ? const Center(child: LinearProgressIndicator()) : null,
           TextField(
             controller: _symbol,
             enabled: !_isSubmitting,

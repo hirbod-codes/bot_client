@@ -10,6 +10,7 @@ import 'package:flutter_client/Pages/Options/runner_options.dart';
 import 'package:flutter_client/Pages/Options/security_options.dart';
 import 'package:flutter_client/Pages/Options/strategy_options.dart';
 import 'package:http/http.dart' as http;
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../Themes/theme.dart';
 
@@ -18,8 +19,9 @@ class SettingsPage extends StatefulWidget {
 
   static Future<String?> getOptions() async {
     try {
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null) return null;
+      await Future.delayed(const Duration(seconds: 1));
       return (await http.get(Uri.parse('${backendUrl}options/'), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''})).body;
     } catch (e) {
       return null;
@@ -40,12 +42,13 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    AppStaticData.getSharedPreferences().then((value) => value.setString(AppDataKeys.options, ''));
     SettingsPage.getOptions();
   }
 
-  final Icon _lightIcon = const Icon(Icons.light_mode_outlined);
-  final Icon _darkIcon = const Icon(Icons.dark_mode_outlined);
-  Icon _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? const Icon(Icons.light_mode_outlined) : const Icon(Icons.dark_mode_outlined);
+  final Icon _lightIcon = const Icon(Symbols.light_mode_sharp);
+  final Icon _darkIcon = const Icon(Symbols.dark_mode_sharp);
+  Icon _themeSwitchIcon = customTheme.themeMode == ThemeMode.light ? const Icon(Symbols.light_mode_sharp) : const Icon(Symbols.dark_mode_sharp);
 
   @override
   Widget build(BuildContext context) {
@@ -73,24 +76,20 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-          SizedBox(
-            height: 35,
-            width: 35,
-            child: FloatingActionButton(
-              child: _refreshing ? const CircularProgressIndicator() : const Icon(Icons.refresh),
-              onPressed: () {
-                setState(() {
-                  _refreshing = true;
-                });
-                SettingsPage.getOptions().then((value) async {
-                  if (value == null) return;
+          IconButton(
+            icon: _refreshing ? const CircularProgressIndicator() : const Icon(Symbols.refresh_sharp),
+            onPressed: () {
+              setState(() {
+                _refreshing = true;
+              });
+              SettingsPage.getOptions().then((value) async {
+                if (value == null) return;
 
-                  (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.options, value);
-                }).whenComplete(() => setState(() {
-                      _refreshing = false;
-                    }));
-              },
-            ),
+                (await AppStaticData.getSharedPreferences()).setString(AppDataKeys.options, value);
+              }).whenComplete(() => setState(() {
+                    _refreshing = false;
+                  }));
+            },
           ),
         ],
       ),
@@ -99,12 +98,12 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             const DrawerHeader(
               child: Icon(
-                Icons.android_outlined,
+                Symbols.phone_android,
                 size: 48,
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.store_outlined),
+              leading: const Icon(Symbols.storefront_sharp),
               title: const Text('Broker'),
               onTap: () {
                 setState(() {
@@ -115,7 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.android_outlined),
+              leading: const Icon(Symbols.science_sharp),
               title: const Text('Bot'),
               onTap: () {
                 setState(() {
@@ -126,7 +125,7 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.radar_outlined),
+              leading: const Icon(Symbols.radar_sharp),
               title: const Text('Strategy'),
               onTap: () {
                 setState(() {
@@ -137,7 +136,7 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.calculate_outlined),
+              leading: const Icon(Symbols.analytics_sharp),
               title: const Text('Indicator'),
               onTap: () {
                 setState(() {
@@ -148,7 +147,7 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.money_outlined),
+              leading: const Icon(Symbols.attach_money_sharp),
               title: const Text('Risk Management'),
               onTap: () {
                 setState(() {
@@ -159,7 +158,7 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.manage_accounts_outlined),
+              leading: const Icon(Symbols.manage_accounts_sharp),
               title: const Text('Runner'),
               onTap: () {
                 setState(() {
@@ -170,7 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.security_outlined),
+              leading: const Icon(Symbols.security_sharp),
               title: const Text('Security'),
               onTap: () {
                 setState(() {

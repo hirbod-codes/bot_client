@@ -23,34 +23,39 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
   final _brokerMaximumLeverage = TextEditingController();
   final _commissionPercentage = TextEditingController();
 
+  bool _isLoading = false;
+  bool _isSubmitting = false;
+
   void _setFields(Map<String, dynamic>? options) {
-    if (options == null) return;
+    if (options == null || !options.keys.contains('riskManagementOptions')) return;
 
     setState(() {
-      _margin.text = options['margin']?.toString() ?? '';
-      _leverage.text = options['leverage']?.toString() ?? '';
-      _sLPercentages.text = options['slPercentages']?.toString() ?? '';
-      _riskRewardRatio.text = options['riskRewardRatio']?.toString() ?? '';
-      _brokerCommission.text = options['brokerCommission']?.toString() ?? '';
-      _brokerMaximumLeverage.text = options['brokerMaximumLeverage']?.toString() ?? '';
-      _commissionPercentage.text = options['commissionPercentage']?.toString() ?? '';
+      _margin.text = options["riskManagementOptions"]['margin']?.toString() ?? '';
+      _leverage.text = options["riskManagementOptions"]['leverage']?.toString() ?? '';
+      _sLPercentages.text = options["riskManagementOptions"]['slPercentages']?.toString() ?? '';
+      _riskRewardRatio.text = options["riskManagementOptions"]['riskRewardRatio']?.toString() ?? '';
+      _brokerCommission.text = options["riskManagementOptions"]['brokerCommission']?.toString() ?? '';
+      _brokerMaximumLeverage.text = options["riskManagementOptions"]['brokerMaximumLeverage']?.toString() ?? '';
+      _commissionPercentage.text = options["riskManagementOptions"]['commissionPercentage']?.toString() ?? '';
     });
   }
 
   @override
   void initState() {
-    SettingsPage.getOptions().then((options) {
-      if (options == null) return;
+    super.initState();
+    try {
+      setState(() => _isLoading = true);
+      SettingsPage.getOptions().then((options) {
+        if (options == null) return;
 
-      AppStaticData.getSharedPreferences().then((value) {
-        _setFields((jsonDecode(options) as Map<String, dynamic>)['riskManagementOptions']);
-      }).whenComplete(() {
-        super.initState();
+        AppStaticData.getSharedPreferences().then((value) {
+          _setFields((jsonDecode(options) as Map<String, dynamic>));
+        });
       });
-    });
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
-
-  bool _isSubmitting = false;
 
   void _submit() async {
     String snackBarMessage = 'Error';
@@ -63,7 +68,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
 
       if (_isSubmitting) return;
 
-      String? backendUrl = await AppDataRepository.GetBackendUrl();
+      String? backendUrl = await AppDataRepository.getBackendUrl();
       if (backendUrl == null) {
         snackBarMessage = 'No URL provided';
         return;
@@ -73,9 +78,18 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
         _isSubmitting = true;
       });
 
-      var data = {"Margin": double.parse(_margin.text), "Leverage": double.parse(_leverage.text), "SLPercentages": double.parse(_sLPercentages.text), "RiskRewardRatio": double.parse(_riskRewardRatio.text), "BrokerCommission": double.parse(_brokerCommission.text), "BrokerMaximumLeverage": double.parse(_brokerMaximumLeverage.text), "CommissionPercentage": double.parse(_commissionPercentage.text)};
+      var data = jsonDecode(await SettingsPage.getOptions() ?? '{}') as Map<String, dynamic>;
+      data["riskManagementOptions"] = {
+        "Margin": double.parse(_margin.text),
+        "Leverage": double.parse(_leverage.text),
+        "SLPercentages": double.parse(_sLPercentages.text),
+        "RiskRewardRatio": double.parse(_riskRewardRatio.text),
+        "BrokerCommission": double.parse(_brokerCommission.text),
+        "BrokerMaximumLeverage": double.parse(_brokerMaximumLeverage.text),
+        "CommissionPercentage": double.parse(_commissionPercentage.text),
+      };
 
-      http.Response res = await http.patch(Uri.parse('${backendUrl}risk-management-options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
+      http.Response res = await http.patch(Uri.parse('${backendUrl}options/'), body: jsonEncode(data), headers: {HttpHeaders.contentTypeHeader: ContentType.json.mimeType, HttpHeaders.authorizationHeader: AppStaticData.sharedPreferences?.getString(AppDataKeys.backendAuthKey) ?? ''});
 
       Map<String, dynamic>? responseObject;
       if (res.body != '') responseObject = jsonDecode(res.body) as Map<String, dynamic>;
@@ -102,6 +116,7 @@ class _RiskManagementOptionsState extends State<RiskManagementOptions> {
   @override
   Widget build(BuildContext context) => ListView(
         children: [
+          (_isLoading || _isSubmitting) ? const Center(child: LinearProgressIndicator()) : null,
           TextField(
             controller: _margin,
             keyboardType: TextInputType.number,
